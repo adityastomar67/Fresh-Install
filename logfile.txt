@@ -1,6 +1,0 @@
-/home/singh1205/__data/Shell Scripts/Project-FreshInstall
-[H[2J[3JChecking if the System is Compatible with the Program or Not
-Good....This is a physical machine, Not a VBOX or a Virtual Machine.
-You must be root to run this program
-If You wish to use this Program, Please run it Again with sudo command!!
-Program terminated normally
