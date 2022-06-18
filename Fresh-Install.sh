@@ -3,7 +3,7 @@
 # |  ___| __ ___  ___| |__      |_ _|_ __  ___| |_ __ _| | |  ___| |__       By - Aditya Singh Tomar
 # | |_ | '__/ _ \/ __| '_ \ _____| || '_ \/ __| __/ _` | | | / __| '_ \      Contact - adityastomar67@gmail.com
 # |  _|| | |  __/\__ \ | | |_____| || | | \__ \ || (_| | | |_\__ \ | | |     github - @adityastomar67
-# |_|  |_|  \___||___/_| |_|    |___|_| |_|___/\__\__,_|_|_(_)___/_| |_|     www -
+# |_|  |_|  \___||___/_| |_|    |___|_| |_|___/\__\__,_|_|_(_)___/_| |_|     
 #
 # Made for Arch Linux
 
@@ -682,17 +682,17 @@ __GetInfo() {
 # Initialize and run the script
 trap '_trapCleanup_ $LINENO $BASH_LINENO "$BASH_COMMAND" "${FUNCNAME[*]}" "$0" "${BASH_SOURCE[0]}"' \
     EXIT INT TERM SIGINT SIGQUIT
-set -o errtrace # Trap errors in subshells and functions
-set -o errexit  # Exit on error. Append '||true' if you expect an error
-set -o pipefail # Use last non-zero exit code in a pipeline
-# shopt -s nullglob globstar              # Make `for f in *.txt` work when `*.txt` matches zero files
-IFS=$' \n\t' # Set IFS to preferred implementation
-# set -o xtrace                           # Run in debug mode
-set -o nounset # Disallow expansion of unset variables
-# [[ $# -eq 0 ]] && _parseOptions_ "-h"   # Force arguments when invoking the script
-_parseOptions_ "$@" # Parse arguments passed to script
-# _makeTempDir_ "$(basename "$0")"        # Create a temp directory '$tmpDir'
-# _acquireScriptLock_                     # Acquire script lock
+set -o errtrace                           # Trap errors in subshells and functions
+set -o errexit                            # Exit on error. Append '||true' if you expect an error
+set -o pipefail                           # Use last non-zero exit code in a pipeline
+# shopt -s nullglob globstar                # Make `for f in *.txt` work when `*.txt` matches zero files
+IFS=$' \n\t'                              # Set IFS to preferred implementation
+# set -o xtrace                             # Run in debug mode
+set -o nounset                            # Disallow expansion of unset variables
+# [[ $# -eq 0 ]] && _parseOptions_ "-h"     # Force arguments when invoking the script
+_parseOptions_ "$@"                       # Parse arguments passed to script
+# _makeTempDir_ "$(basename "$0")"          # Create a temp directory '$tmpDir'
+# _acquireScriptLock_                       # Acquire script lock
 
 
 clear
