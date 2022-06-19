@@ -679,6 +679,12 @@ __GetInfo() {
 
 } # To Get & Set Information about System
 
+__Clone() {
+    
+    # For Setting Up the configuration Files
+    git clone git@github.com:adityastomar67/.dotfiles.git
+}
+
 # Initialize and run the script
 trap '_trapCleanup_ $LINENO $BASH_LINENO "$BASH_COMMAND" "${FUNCNAME[*]}" "$0" "${BASH_SOURCE[0]}"' \
     EXIT INT TERM SIGINT SIGQUIT
