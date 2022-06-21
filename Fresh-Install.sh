@@ -7,6 +7,11 @@
 #
 # Made for Arch Linux
 
+# TODO: Functionality to imply yes to all questions
+# TODO: Functionality to install packages from a file
+# TODO: Quiet mode
+# TODO: Verbose mode
+
 _mainScript_() {
 
     echo -e "hello world"
@@ -686,17 +691,17 @@ __Clone() {
 }
 
 # Initialize and run the script
-trap '_trapCleanup_ $LINENO $BASH_LINENO "$BASH_COMMAND" "${FUNCNAME[*]}" "$0" "${BASH_SOURCE[0]}"' \
-    EXIT INT TERM SIGINT SIGQUIT
-set -o errtrace                           # Trap errors in subshells and functions
-set -o errexit                            # Exit on error. Append '||true' if you expect an error
-set -o pipefail                           # Use last non-zero exit code in a pipeline
+# trap '_trapCleanup_ $LINENO $BASH_LINENO "$BASH_COMMAND" "${FUNCNAME[*]}" "$0" "${BASH_SOURCE[0]}"' \
+#     EXIT INT TERM SIGINT SIGQUIT
+# set -o errtrace                           # Trap errors in subshells and functions
+# set -o errexit                            # Exit on error. Append '||true' if you expect an error
+# set -o pipefail                           # Use last non-zero exit code in a pipeline
 # shopt -s nullglob globstar                # Make `for f in *.txt` work when `*.txt` matches zero files
-IFS=$' \n\t'                              # Set IFS to preferred implementation
+# IFS=$' \n\t'                              # Set IFS to preferred implementation
 # set -o xtrace                             # Run in debug mode
-set -o nounset                            # Disallow expansion of unset variables
+# set -o nounset                            # Disallow expansion of unset variables
 # [[ $# -eq 0 ]] && _parseOptions_ "-h"     # Force arguments when invoking the script
-_parseOptions_ "$@"                       # Parse arguments passed to script
+# _parseOptions_ "$@"                       # Parse arguments passed to script
 # _makeTempDir_ "$(basename "$0")"          # Create a temp directory '$tmpDir'
 # _acquireScriptLock_                       # Acquire script lock
 
@@ -704,6 +709,6 @@ _parseOptions_ "$@"                       # Parse arguments passed to script
 clear
 # __CheckMachine
 # __GetInfo
-_usage_
-_mainScript_ # Run script
-_safeExit_   # Exit cleanly
+# _usage_
+# _mainScript_ # Run script
+# _safeExit_   # Exit cleanly
