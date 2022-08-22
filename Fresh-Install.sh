@@ -18,6 +18,8 @@
 if [[ ! $(command -v go) ]]; then
     echo >&2 "Script require Go but it's not installed."
     read -p "Continue to install Go or Abort? (Y/N): " confirm && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]] || exit 1
+    CMD=$(curl -s https://go.dev/doc/install | grep "rm -rf" | sed -E 's/(\$ |<[\/a-zA-Z =\"-]*>)//g')
+    sudo sh "$CMD"
 fi
 
 ## Installing Charmbracelet/gum for beautiful UI
