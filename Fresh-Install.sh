@@ -11,15 +11,19 @@
 # TODO: Quiet mode
 # TODO: Verbose mode
 
-### HEADER
-gum style --foreground 212 --border-foreground 212 --border double --align center --width 50 --margin "1 2" --padding "2 4" 'Fresh Install' 'By - adityastomar67'
 
 ### Checks
 
 ## Check wether the go is installed or not
-command -v go >/dev/null 2>&1 || { echo >&2 "I require foo but it's not installed.  Aborting."; exit 1; }
+if [[ ! $(command -v go) ]]; then
+    echo >&2 "Script require Go but it's not installed."
+    read -p "Continue to install Go or Abort? (Y/N): " confirm && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]] || exit 1
+fi
 
 ## Installing Charmbracelet/gum for beautiful UI
 if [[ ! $(command -v gum) ]]; then
     go install github.com/charmbracelet/gum@latest
 fi
+
+### HEADER
+gum style --foreground 212 --border-foreground 212 --border double --align center --width 50 --margin "1 2" --padding "2 4" 'Fresh Install' 'By - adityastomar67'
