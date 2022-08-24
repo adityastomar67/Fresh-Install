@@ -13,11 +13,11 @@
 
 ## Git Cloneing
 __clone() {
-    if [ -d "$2" ]; then
-        echo "Directory $2 already exists"
-        return
-    fi
-    git clone "$1" "$2"
+	if [ -d "$2" ]; then
+		echo "Directory $2 already exists"
+		return
+	fi
+	git clone "$1" "$2"
 }
 
 ### Checks
@@ -36,10 +36,12 @@ if [[ ! $(command -v gum) ]]; then
 fi
 
 ### HEADER
-gum style --foreground 212 --border-foreground 212 --border double --align center --width 50 --margin "1 2" --padding "2 4" 'Fresh Install' 'By - adityastomar67'
+_Header() {
+	gum style --foreground 212 --border-foreground 212 --border double --align center --width 50 --margin "1 2" --padding "2 4" 'Fresh Install' 'By - adityastomar67'
+}
 
 _GRUB_Install() {
-	git clone https://github.com/catppuccin/grub.git /tmp/repos && cd "/tmp/repos/"
+	__clone "https://github.com/catppuccin/grub.git" "/tmp/repos" && cd "/tmp/repos/" || exit
 	sudo cp -r src/* /usr/share/grub/themes/
 
 	TYPE=$(gum choose "catppuccin-latte" "catppuccin-frappe" "catppuccin-macchiato" "catppuccin-mocha")
@@ -50,33 +52,33 @@ _GRUB_Install() {
 }
 
 _Install_Dots() {
-    ## Checking if Stow is Installed
+	## Checking if Stow is Installed
 	if [[ ! $(command -v stow) ]]; then
 		sudo pacman -S stow --noconfirm
 	fi
 
-    ## Making Backups
+	## Making Backups
 	list="./bin/text.txt"
 	while IFS= read -r item; do
-		mv $item $item.backup
+		mv "$item" "$item.backup"
 	done <"$list"
 
-    ## Stowing dots
-	cd $HOME/.dotfiles
+	## Stowing dots
+	cd "HOME/.dotfiles" || exit
 	stow .
 }
 
 _Install_Neovim() {
-    ## Checking if Neovim is Installed
-    if [[ ! $(command -v nvim) ]]; then
-        sudo pacman -S neovim --noconfirm
-    fi
+	## Checking if Neovim is Installed
+	if [[ ! $(command -v nvim) ]]; then
+		sudo pacman -S neovim --noconfirm
+	fi
 
-    ## Making Backup of current config
-    mv $HOME/.config/nvim $HOME/.config/nvim.backup
+	## Making Backup of current config
+	mv $HOME/.config/nvim $HOME/.config/nvim.backup
 
-    __clone "https://github.com/adityastomar67/nvim-dots.git" "$HOME/.config/nvim"
-    __clone "https://github.com/adityastomar67/friendly-snippets.git" "$HOME/.config/nvim/"
+	__clone "https://github.com/adityastomar67/nvim-dots.git" "$HOME/.config/nvim"
+	__clone "https://github.com/adityastomar67/friendly-snippets.git" "$HOME/.config/nvim/"
 }
 
 ################  HELP  ####################
