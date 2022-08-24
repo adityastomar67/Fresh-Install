@@ -11,6 +11,15 @@
 # TODO: Quiet mode
 # TODO: Verbose mode
 
+## Git Cloneing
+__clone() {
+    if [ -d "$2" ]; then
+        echo "Directory $2 already exists"
+        return
+    fi
+    git clone "$1" "$2"
+}
+
 ### Checks
 
 ## Check wether the go is installed or not
@@ -32,15 +41,43 @@ gum style --foreground 212 --border-foreground 212 --border double --align cente
 _GRUB_Install() {
 	git clone https://github.com/catppuccin/grub.git /tmp/repos && cd "/tmp/repos/"
 	sudo cp -r src/* /usr/share/grub/themes/
-	
+
 	TYPE=$(gum choose "catppuccin-latte" "catppuccin-frappe" "catppuccin-macchiato" "catppuccin-mocha")
 	THEME="GRUB_THEME='/usr/share/grub/themes/$TYPE-grub-theme/theme.txt'"
 	sed -r -i "s/GRUB_THEME=\"([/.-][a-z]\w+)*\"/$THEME/" /etc/default/grub
-	
+
 	sudo grub-mkconfig -o /boot/grub/grub.cfg
 }
 
+_Install_Dots() {
+    ## Checking if Stow is Installed
+	if [[ ! $(command -v stow) ]]; then
+		sudo pacman -S stow --noconfirm
+	fi
 
+    ## Making Backups
+	list="./bin/text.txt"
+	while IFS= read -r item; do
+		mv $item $item.backup
+	done <"$list"
+
+    ## Stowing dots
+	cd $HOME/.dotfiles
+	stow .
+}
+
+_Install_Neovim() {
+    ## Checking if Neovim is Installed
+    if [[ ! $(command -v nvim) ]]; then
+        sudo pacman -S neovim --noconfirm
+    fi
+
+    ## Making Backup of current config
+    mv $HOME/.config/nvim $HOME/.config/nvim.backup
+
+    __clone "https://github.com/adityastomar67/nvim-dots.git" "$HOME/.config/nvim"
+    __clone "https://github.com/adityastomar67/friendly-snippets.git" "$HOME/.config/nvim/"
+}
 
 ################  HELP  ####################
 ## For GRUB Theme
