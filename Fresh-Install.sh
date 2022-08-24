@@ -32,9 +32,11 @@ gum style --foreground 212 --border-foreground 212 --border double --align cente
 _GRUB_Install() {
 	git clone https://github.com/catppuccin/grub.git /tmp/repos && cd "/tmp/repos/"
 	sudo cp -r src/* /usr/share/grub/themes/
-	TYPE=$(gum choose "catppuccin-latte" "catppuccin-frappe" "catppuccin-macchiato" "Catppuccin-mocha")
+	
+	TYPE=$(gum choose "catppuccin-latte" "catppuccin-frappe" "catppuccin-macchiato" "catppuccin-mocha")
 	THEME="GRUB_THEME='/usr/share/grub/themes/$TYPE-grub-theme/theme.txt'"
 	sed -r -i "s/GRUB_THEME=\"([/.-][a-z]\w+)*\"/$THEME/" /etc/default/grub
+	
 	sudo grub-mkconfig -o /boot/grub/grub.cfg
 }
 
