@@ -11,6 +11,60 @@
 # TODO: Quiet mode
 # TODO: Verbose mode
 
+## Selection for Package Manager
+if [[ $(uname) == "Linux" ]]; then
+	PACKAGE_MANAGER=""
+	if [ -x "$(command -v pacman)" ]; then
+		PACKAGE_MANAGER="pacman"
+	elif [ -x "$(command -v apt-get)" ]; then
+		PACKAGE_MANAGER="apt-get"
+	elif [ -x "$(command -v dnf)" ]; then
+		PACKAGE_MANAGER="dnf"
+	elif [ -x "$(command -v zypper)" ]; then
+		PACKAGE_MANAGER="zypper"
+	elif [ -x "$(command -v emerge)" ]; then
+		PACKAGE_MANAGER="emerge"
+	fi
+elif [[ $(uname) == "Darwin" ]]; then
+	LIST_OF_APPS=($(ls "/bin")+$(ls "/usr/bin"))
+	IFS="|"
+	if [[ "${IFS}"${LIST_OF_APPS[*]}"${IFS}" =~ "${IFS}brew${IFS}" ]]; then
+		echo "brew is not installed"
+		echo "Installing brew"
+		/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+	else
+		echo "brew, is installed. Checking next dependency.."
+	fi
+	PACKAGE_MANAGER="brew"
+fi
+
+__pkg_install() {
+	LIST_OF_APPS=($(ls "/bin")+$(ls "/usr/bin"))
+	IFS="|"
+	if [[ "${IFS}"${LIST_OF_APPS[*]}"${IFS}" =~ "${IFS}$2${IFS}" ]]; then
+		echo "$1, is installed. Checking next dependency..."
+	else
+		echo "$1 is not installed."
+		echo "Installing $1"
+		if [[ "$PACKAGE_MANAGER" == "pacman" ]]; then
+			sudo pacman -Sy "$1" --noconfirm
+		elif [[ "$PACKAGE_MANAGER" =~ "apt-get" ]]; then
+			sudo apt update
+			sudo apt install "$1" -y
+		elif [[ "$PACKAGE_MANAGER" =~ "dnf" ]]; then
+			sudo dnf update -y
+			sudo dnf install "$1" -y
+		elif [[ "$PACKAGE_MANAGER" =~ "zypper" ]]; then
+			sudo zypper ref
+			sudo zypper install -n "$1"
+		elif [[ "$PACKAGE_MANAGER" =~ "emerge" ]]; then
+			emerge "$1"
+		elif [[ "$PACKAGE_MANAGER" =~ "brew" ]]; then
+			brew install "$1"
+		fi
+	fi
+}
+
 ## Git Cloneing
 __clone() {
 	if [ -d "$2" ]; then
