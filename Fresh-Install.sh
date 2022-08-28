@@ -169,6 +169,7 @@ HELP_GRUB="https://github.com/catppuccin/grub"
 if [ $# -gt 0 ]; then
 	case "$1" in
 	-v|--vim)
+        echo "deployed"
 		_Install_Neovim
 		;;
 	-x | --dots)
