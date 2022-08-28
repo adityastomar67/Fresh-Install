@@ -12,8 +12,29 @@
 # TODO: Verbose mode
 
 ## Starting the execution
-# __main() {
-# }
+__main() {
+	if [ $# -gt 0 ]; then
+		case "$1" in
+		-v | --vim)
+			echo "deployed"
+			_Install_Neovim
+			;;
+		-x | --dots)
+			_Install_Dots
+			;;
+		a)
+			avalue="$OPTARG"
+			echo "The value provided is $OPTARG"
+			;;
+		?)
+			echo "script usage: $(basename \$0) [-l] [-h] [-a somevalue]" >&2
+			exit 1
+			;;
+		esac
+	else
+		echo "No args"
+	fi
+}
 
 ## Selection for Package Manager
 if [[ $(uname) == "Linux" ]]; then
@@ -159,31 +180,11 @@ _Install_Neovim() {
 
 	## Clonig my config from github plus my fork of friendly-snippets
 	__clone "https://github.com/adityastomar67/nvim-dots.git" "$HOME/.config/nvim"
-	__clone "https://github.com/adityastomar67/friendly-snippets.git" "$HOME/.config/nvim/"
+	__clone "https://github.com/adityastomar67/friendly-snippets.git" "$HOME/.config/nvim/friendly-snippets"
 }
 
 ################  HELP  ####################
 ## For GRUB Theme
 HELP_GRUB="https://github.com/catppuccin/grub"
 
-if [ $# -gt 0 ]; then
-	case "$1" in
-	-v|--vim)
-        echo "deployed"
-		_Install_Neovim
-		;;
-	-x | --dots)
-		_Install_Dots
-		;;
-	a)
-		avalue="$OPTARG"
-		echo "The value provided is $OPTARG"
-		;;
-	?)
-		echo "script usage: $(basename \$0) [-l] [-h] [-a somevalue]" >&2
-		exit 1
-		;;
-	esac
-else
-	echo "No args"
-fi
+__main
