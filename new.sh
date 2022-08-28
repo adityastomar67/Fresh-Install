@@ -37,4 +37,6 @@ if [ $# -gt 0 ]; then
       exit 1
       ;;
 	esac
+else
+    echo "No args"
 fi
