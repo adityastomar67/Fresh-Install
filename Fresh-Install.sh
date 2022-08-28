@@ -187,4 +187,4 @@ _Install_Neovim() {
 ## For GRUB Theme
 HELP_GRUB="https://github.com/catppuccin/grub"
 
-__main
+__main $1
