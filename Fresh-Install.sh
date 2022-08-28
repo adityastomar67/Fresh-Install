@@ -11,6 +11,30 @@
 # TODO: Quiet mode
 # TODO: Verbose mode
 
+## Starting the execution
+__main() {
+	if [ $# -gt 0 ]; then
+		case "$1" in
+		-v | --vim)
+			_Install_Neovim
+			;;
+		-x | --dots)
+            _Install_Dots
+			;;
+		a)
+			avalue="$OPTARG"
+			echo "The value provided is $OPTARG"
+			;;
+		?)
+			echo "script usage: $(basename \$0) [-l] [-h] [-a somevalue]" >&2
+			exit 1
+			;;
+		esac
+	else
+		echo "No args"
+	fi
+}
+
 ## Selection for Package Manager
 if [[ $(uname) == "Linux" ]]; then
 	PACKAGE_MANAGER=""
@@ -125,12 +149,35 @@ _Install_Dots() {
 _Install_Neovim() {
 	## Checking if Neovim is Installed
 	if [[ ! $(command -v nvim) ]]; then
-		sudo pacman -S neovim --noconfirm
+		NVIM=$(gum choose "Stable" "Nightly")
+		if [[ "$NVIM" == "Stable" ]]; then
+			mkdir -p ~/tmp
+			cd ~/tmp
+			curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
+			sudo chmod u+x nvim.appimage
+			./nvim.appimage --appimage-extract
+			./squashfs-root/AppRun --version
+			sudo mv squashfs-root /
+			sudo mv /squashfs-root/AppRun /usr/bin/nvim
+		else
+			mkdir -p ~/tmp
+			cd ~/tmp
+			git clone --depth 1 --branch nightly https://github.com/neovim/neovim.git
+			cd neovim
+			make CMAKE_BUILD_TYPE=RelWithDebInfo
+			sudo make install
+		fi
 	fi
 
-	## Making Backup of current config
-	mv $HOME/.config/nvim $HOME/.config/nvim.backup
+	## Installing Dependencies
+	sudo npm install -g typescript typescript-language-server vscode-langservers-extracted vls @tailwindcss/language-server yaml-language-server @prisma/language-server emmet-ls neovim graphql-language-service-cli graphql-language-service-server @astrojs/language-server bash-language-server prettier
 
+	sudo pacman -S lua-language-server pyright deno rust-analyzer gopls shellcheck shfmt stylua autopep8 --noconfirm
+
+	## Making Backup of current config
+	[ -d "$HOME/.config/nvim" ] && mv $HOME/.config/nvim $HOME/.config/nvim.backup
+
+	## Clonig my config from github plus my fork of friendly-snippets
 	__clone "https://github.com/adityastomar67/nvim-dots.git" "$HOME/.config/nvim"
 	__clone "https://github.com/adityastomar67/friendly-snippets.git" "$HOME/.config/nvim/"
 }
