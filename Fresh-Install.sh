@@ -12,9 +12,8 @@
 # TODO: Verbose mode
 
 ## Starting the execution
-__main() {
-
-}
+# __main() {
+# }
 
 ## Selection for Package Manager
 if [[ $(uname) == "Linux" ]]; then
@@ -167,23 +166,23 @@ _Install_Neovim() {
 ## For GRUB Theme
 HELP_GRUB="https://github.com/catppuccin/grub"
 
-	if [ $# -gt 0 ]; then
-		case "$1" in
-		-v | --vim)
-			_Install_Neovim
-			;;
-		-x | --dots)
-            _Install_Dots
-			;;
-		a)
-			avalue="$OPTARG"
-			echo "The value provided is $OPTARG"
-			;;
-		?)
-			echo "script usage: $(basename \$0) [-l] [-h] [-a somevalue]" >&2
-			exit 1
-			;;
-		esac
-	else
-		echo "No args"
-	fi
+if [ $# -gt 0 ]; then
+	case "$1" in
+	-v|--vim)
+		_Install_Neovim
+		;;
+	-x | --dots)
+		_Install_Dots
+		;;
+	a)
+		avalue="$OPTARG"
+		echo "The value provided is $OPTARG"
+		;;
+	?)
+		echo "script usage: $(basename \$0) [-l] [-h] [-a somevalue]" >&2
+		exit 1
+		;;
+	esac
+else
+	echo "No args"
+fi
