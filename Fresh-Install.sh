@@ -11,6 +11,12 @@
 # TODO: Quiet mode
 # TODO: Verbose mode
 
+mkdir -p /tmp/fresh-install
+
+# Variuables
+TEMP_DIR="/tmp/fresh-install"
+NVIM_DIR="$HOME/.config/nvim"
+
 ## Selection for Package Manager
 if [[ $(uname) == "Linux" ]]; then
 	PACKAGE_MANAGER=""
@@ -158,16 +164,13 @@ _Install_Neovim() {
 	sudo pacman -S lua-language-server pyright deno rust-analyzer gopls shellcheck shfmt stylua autopep8 --noconfirm
 
 	## Making Backup of current config
-	[ -d "$HOME/.config/nvim" ] && mv $HOME/.config/nvim $HOME/.config/nvim.backup
+	[ -d "$NVIM_DIR" ] && mv $NVIM_DIR "$NVIM_DIR.backup"
 
 	## Clonig my config from github plus my fork of friendly-snippets
-	__clone "https://github.com/adityastomar67/nvim-dots.git" "$HOME/.config/nvim"
-	__clone "https://github.com/adityastomar67/friendly-snippets.git" "$HOME/.config/nvim/friendly-snippets"
+	__clone "https://github.com/adityastomar67/nvim-dots.git" "$NVIM_DIR"
+	__clone "https://github.com/adityastomar67/friendly-snippets.git" "$NVIM_DIR/bin/friendly-snippets"
+    __clone "https://github.com/adityastomar67/LuaSnip-snippets.nvim.git" "$TEMP_DIR/snips" && mv "$TEMP_DIR/snips/lua/luasnip_snippets" "$NVIM_DIR/bin/luasnippets"
 }
-
-################  HELP  ####################
-## For GRUB Theme
-HELP_GRUB="https://github.com/catppuccin/grub"
 
 ## Starting the execution
 if [ $# -gt 0 ]; then
