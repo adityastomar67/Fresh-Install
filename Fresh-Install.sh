@@ -71,7 +71,7 @@ __clone() {
 		echo "Directory $2 already exists"
 		return
 	fi
-	git clone "$1" "$2"
+	git clone --quiet "$1" "$2"
 }
 
 ### Checks
@@ -123,13 +123,18 @@ _Install_Dots() {
 }
 
 _Install_Neovim() {
+    gum style --foreground 202 --border-foreground 114 --border rounded --align center --width 40 --margin "0 2" --padding "1 2" 'Installing Neovim...'
+
 	## Checking if Neovim is Installed
 	if [[ ! $(command -v nvim) ]]; then
-		NVIM=$(gum choose "Stable" "Nightly")
-		if [[ "$NVIM" == "Stable" ]]; then
+        gum style --foreground 202 --border none 'Choose between :'
+		NVIM_VERSION=$(gum choose "Stable" "Nightly")
+        printf "\nInstalling %s version...\n" "$NVIM_VERSION"
+
+		if [[ "$NVIM_VERSION" == "Stable" ]]; then
 			mkdir -p ~/tmp
 			cd ~/tmp
-			curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
+			curl -sLO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
 			sudo chmod u+x nvim.appimage
 			./nvim.appimage --appimage-extract
 			./squashfs-root/AppRun --version
@@ -138,11 +143,13 @@ _Install_Neovim() {
 		else
 			mkdir -p ~/tmp
 			cd ~/tmp
-			git clone --depth 1 --branch nightly https://github.com/neovim/neovim.git
+			git clone --quiet --depth 1 --branch nightly https://github.com/neovim/neovim.git
 			cd neovim
 			make CMAKE_BUILD_TYPE=RelWithDebInfo
 			sudo make install
 		fi
+    else
+        gum style --foreground 202 --border none 'Neovim is already installed. Installing configs...'
 	fi
 
 	## Installing Dependencies
@@ -166,7 +173,6 @@ HELP_GRUB="https://github.com/catppuccin/grub"
 if [ $# -gt 0 ]; then
 	case "$1" in
 	-v | --vim)
-		echo "deployed"
 		_Install_Neovim
 		;;
 	-x | --dots)
