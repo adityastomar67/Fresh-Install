@@ -113,8 +113,9 @@ __Help() {
     echo " -d, --dots           Install various config files."
     echo " -n, --nvim           Install only configs Related to Neovim."
     echo " -g, --grub           Install GRUB Theme."
+    echo " -w, --wall           Install Wallpapers."
     echo "Usage: ./Fresh-Install.sh [Options...] <url>"
     echo "Usage: ./Fresh-Install.sh [Options...] <url>"
 }
 
-__Help
+export __Help
