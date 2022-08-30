@@ -129,13 +129,13 @@ _Install_Dots() {
 }
 
 _Install_Neovim() {
-    gum style --foreground 202 --border-foreground 114 --border rounded --align center --width 40 --margin "0 2" --padding "1 2" 'Installing Neovim...'
+	gum style --foreground 202 --border-foreground 114 --border rounded --align center --width 40 --margin "0 2" --padding "1 2" 'Installing Neovim...'
 
 	## Checking if Neovim is Installed
 	if [[ ! $(command -v nvim) ]]; then
-        gum style --foreground 202 --border none 'Choose between :'
+		gum style --foreground 202 --border none 'Choose between :'
 		NVIM_VERSION=$(gum choose "Stable" "Nightly")
-        printf "\nInstalling %s version...\n" "$NVIM_VERSION"
+		printf "\nInstalling %s version...\n" "$NVIM_VERSION"
 
 		if [[ "$NVIM_VERSION" == "Stable" ]]; then
 			mkdir -p ~/tmp
@@ -154,8 +154,8 @@ _Install_Neovim() {
 			make CMAKE_BUILD_TYPE=RelWithDebInfo
 			sudo make install
 		fi
-    else
-        gum style --foreground 202 --border none 'Neovim is already installed. Installing configs...'
+	else
+		gum style --foreground 202 --border none 'Neovim is already installed. Installing configs...'
 	fi
 
 	## Installing Node Dependencies
@@ -170,16 +170,56 @@ _Install_Neovim() {
 	## Clonig my config from github plus my fork of friendly-snippets
 	__clone "https://github.com/adityastomar67/nvim-dots.git" "$NVIM_DIR"
 	__clone "https://github.com/adityastomar67/friendly-snippets.git" "$NVIM_DIR/bin/friendly-snippets"
-    __clone "https://github.com/adityastomar67/LuaSnip-snippets.nvim.git" "$TEMP_DIR/snips" && mv "$TEMP_DIR/snips/lua/luasnip_snippets" "$NVIM_DIR/bin/luasnippets"
+	__clone "https://github.com/adityastomar67/LuaSnip-snippets.nvim.git" "$TEMP_DIR/snips" && mv "$TEMP_DIR/snips/lua/luasnip_snippets" "$NVIM_DIR/bin/luasnippets"
 }
 
-_Set_Wallpaper(){ ## Needs to be worked on!!!
+# NOTE: Needs to be worked on!!
+_Set_Wallpaper() {
+	__pkg_install feh
 	gum style --foreground 202 --border none 'Checkout Wallpapers @'
-	#  echo -e '\e]8;;http://example.com\aThis is a hyperlink\e]8;;\a'  
-	echo -e '\e]8;;https://www.github.com/adityastomar67/Wallpapers/\e]8;;\a'  
+	#  echo -e '\e]8;;http://example.com\aThis is a hyperlink\e]8;;\a'
+	echo -e '\e]8;;https://www.github.com/adityastomar67/Wallpapers/\e]8;;\a'
 
-	WALL=$(gum input --placeholder "Enter the Wallpaper Number:")
-	curl -sLo "https://github.com/adityastomar67/Wallpapers/raw/main/wall$WALL.[jpg,png]" wallpaper
+	WALL=$(gum input --placeholder "Enter the Wallpaper Number: (or Type \"All\" to download full collection)")
+
+	# For downloading all wallpapers
+	if [[ $WALL == [aA] || $WALL == [aA][lL][lL] ]]; then
+		[ -d "$HOME/.config/wall/Wallpapers" ] && rm -rf ~/.config/wall/Wallpapers
+		mkdir -p "$HOME/.config/wall/"
+
+		cd ~/.config/wall/
+		if [ -f 'wall*' ]; then
+			command rm wall*
+		fi
+
+		git clone https://github.com/adityastomar67/Wallpapers
+		mv ~/.config/wall/Wallpapers/wall* .
+		rm -rf ~/.config/wall/Wallpapers
+		ls | grep "wall[0-9]*.png" >list.txt
+
+		list="./list.txt"
+		while IFS= read -r file; do
+			mv -- "$file" "${file%.png}.jpg"
+		done <"$list"
+
+		command rm list.txt
+
+        echo "Random Wallpaper Applied!!"
+		count=$(command ls ~/.config/wall | grep -c "wall[0-9]*.jpg")
+		feh --no-fehbg --bg-fill "$HOME/.config/wall/wall$((1 + RANDOM % $count)).jpg"
+	else
+		# curl -sL "https://github.com/adityastomar67/Wallpapers/raw/main/wall$WALL.(jpg|png)" -o wallpaper
+		args="https://github.com/adityastomar67/Wallpapers/raw/main/wall$WALL.png"
+		# curl -fs $args && echo "SUCCESS!" || echo "OH NO!"
+		if [[ $(curl -fs $args) ]]; then
+			curl -sL "https://github.com/adityastomar67/Wallpapers/raw/main/wall$WALL.png" --output "$HOME/wall.png"
+		else
+			curl -sL "https://github.com/adityastomar67/Wallpapers/raw/main/wall$WALL.jpg" --output "$HOME/wall.jpg"
+		fi
+
+		# Setting the Background
+		[ -f "$HOME/wall$WALL.jpg" ] && feh --no-fehbg --bg-fill "$HOME/wall$WALL.jpg" || feh --no-fehbg --bg-fill "$HOME/wall$WALL.png"
+	fi
 }
 ## Starting the execution
 if [ $# -gt 0 ]; then
