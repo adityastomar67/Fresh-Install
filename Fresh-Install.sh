@@ -11,11 +11,13 @@
 # TODO: Quiet mode
 # TODO: Verbose mode
 
+# Directories
 mkdir -p /tmp/fresh-install
 
-# Variuables
+# Variaables
 TEMP_DIR="/tmp/fresh-install"
 NVIM_DIR="$HOME/.config/nvim"
+GITHUB="https://www.github.com/adityastomar67"
 
 ## Selection for Package Manager
 if [[ $(uname) == "Linux" ]]; then
@@ -80,8 +82,6 @@ __clone() {
 	git clone --quiet "$1" "$2"
 }
 
-### Checks
-
 ## Check wether the go is installed or not
 if [[ ! $(command -v go) ]]; then
 	echo >&2 "Script require Go but it's not installed."
@@ -100,7 +100,7 @@ _Header() {
 	gum style --foreground 212 --border-foreground 212 --border double --align center --width 50 --margin "1 2" --padding "2 4" 'Fresh Install' 'By - adityastomar67'
 }
 
-_GRUB_Install() {
+_Install_GRUB() {
 	__clone "https://github.com/catppuccin/grub.git" "/tmp/repos" && cd "/tmp/repos/" || exit
 	sudo cp -r src/* /usr/share/grub/themes/
 
@@ -158,9 +158,10 @@ _Install_Neovim() {
         gum style --foreground 202 --border none 'Neovim is already installed. Installing configs...'
 	fi
 
-	## Installing Dependencies
+	## Installing Node Dependencies
 	sudo npm install -g typescript typescript-language-server vscode-langservers-extracted vls @tailwindcss/language-server yaml-language-server @prisma/language-server emmet-ls neovim graphql-language-service-cli graphql-language-service-server @astrojs/language-server bash-language-server prettier
 
+	## Installing Node Dependencies
 	sudo pacman -S lua-language-server pyright deno rust-analyzer gopls shellcheck shfmt stylua autopep8 --noconfirm
 
 	## Making Backup of current config
@@ -172,18 +173,25 @@ _Install_Neovim() {
     __clone "https://github.com/adityastomar67/LuaSnip-snippets.nvim.git" "$TEMP_DIR/snips" && mv "$TEMP_DIR/snips/lua/luasnip_snippets" "$NVIM_DIR/bin/luasnippets"
 }
 
+_Set_Wallpaper(){ ## Needs to be worked on!!!
+	gum style --foreground 202 --border none 'Checkout Wallpapers @'
+	#  echo -e '\e]8;;http://example.com\aThis is a hyperlink\e]8;;\a'  
+	echo -e '\e]8;;https://www.github.com/adityastomar67/Wallpapers/\e]8;;\a'  
+
+	WALL=$(gum input --placeholder "Enter the Wallpaper Number:")
+	curl -sLo "https://github.com/adityastomar67/Wallpapers/raw/main/wall$WALL.[jpg,png]" wallpaper
+}
 ## Starting the execution
 if [ $# -gt 0 ]; then
 	case "$1" in
 	-v | --vim)
 		_Install_Neovim
 		;;
-	-x | --dots)
+	-d | --dots)
 		_Install_Dots
 		;;
-	a)
-		avalue="$OPTARG"
-		echo "The value provided is $OPTARG"
+	-w | --wall)
+		_Set_Wallpaper
 		;;
 	?)
 		echo "script usage: $(basename \$0) [-l] [-h] [-a somevalue]" >&2
