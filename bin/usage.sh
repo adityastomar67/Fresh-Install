@@ -108,7 +108,7 @@
 #    echo "./postinstall.sh -[Your chosen options] >> /root/postinstall.log 2>&1"
 # }
 
-__Help() {
+__Usage() {
     echo "Usage: ./Fresh-Install.sh [Options...] <url>"
     echo " -d, --dots           Install various config files."
     echo " -n, --nvim           Install only configs Related to Neovim."
@@ -117,5 +117,3 @@ __Help() {
     echo "Usage: ./Fresh-Install.sh [Options...] <url>"
     echo "Usage: ./Fresh-Install.sh [Options...] <url>"
 }
-
-export __Help
