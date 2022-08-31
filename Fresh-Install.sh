@@ -8,8 +8,8 @@
 
 # TODO: Functionality to imply yes to all questions
 # TODO : Functionality to install packages from a file
-# TODO: Quiet mode
-# TODO: Verbose mode
+
+source ./bin/usage.sh
 
 # Directories
 mkdir -p /tmp/fresh-install
@@ -98,6 +98,63 @@ fi
 ### HEADER
 _Header() {
 	gum style --foreground 212 --border-foreground 212 --border double --align center --width 50 --margin "1 2" --padding "2 4" 'Fresh Install' 'By - adityastomar67'
+}
+
+_Install_Dependencies(){
+	## Installing Basic Dependencies
+	__basic_dep(){
+	list="./requirements/list.pacman"
+	while IFS= read -r app; do
+		__pkg_install $app
+	done <"$list"
+	}
+
+	## Installing Node Dependencies
+	__node_dep(){
+	list="./requirements/list.node"
+	while IFS= read -r app; do
+		__pkg_install $app
+	done <"$list"
+	}
+
+	## Installing Pip Dependencies
+	__pip_dep(){
+	list="./requirements/list.pip"
+	while IFS= read -r app; do
+		__pkg_install $app
+	done <"$list"
+	}
+
+	## Installing Git Dependencies
+	__git_dep(){
+	list="./requirements/list.git"
+	while IFS= read -r app; do
+		__pkg_install $app
+	done <"$list"
+	}
+
+	## Calling Functions	
+	if [ $# -gt 0 ]; then
+	case "$1" in
+	-b)
+		__basic_dep
+		;;
+	-n)
+		__node_dep
+		;;
+	-g)
+		__git_dep
+		;;
+	-p)
+		__pip_dep
+		;;
+	-a)
+		__basic_dep
+		__git_dep
+		__node_dep
+		__pip_dep
+		;;
+	fi
 }
 
 _Install_GRUB() {
