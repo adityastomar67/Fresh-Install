@@ -3,14 +3,10 @@
   A script to set up a freshly installed Linux OS, as desired needs
 </div>
 
-```bash
-
+```
 Usage: ./Fresh-Install.sh [Options...] <url>
- -d, --dots           Install various config files. 
-
+ -d, --dots           Install various config files.
  -n, --nvim           Install only configs Related to Neovim.
-
  -g, --grub           Install GRUB Theme.
-
  -w, --wall           Install Wallpapers.
  ```
