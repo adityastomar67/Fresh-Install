@@ -114,6 +114,6 @@ __Usage() {
     echo " -n, --nvim           Install only configs Related to Neovim."
     echo " -g, --grub           Install GRUB Theme."
     echo " -w, --wall           Install Wallpapers."
-    echo "Usage: ./Fresh-Install.sh [Options...] <url>"
+    echo " -m, --menu           Show other options."
     echo "Usage: ./Fresh-Install.sh [Options...] <url>"
 }

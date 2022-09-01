@@ -86,7 +86,7 @@ __clone() {
 if [[ ! $(command -v go) ]]; then
 	echo >&2 "Script require Go but it's not installed."
 	read -p "Continue to install Go or Abort? (Y/N): " confirm && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]] || exit 1
-	CMD=$(curl -s https://go.dev/doc/install | grep "rm -rf" | sed -E 's/(\$ |<[\/a-zA-Z =\"-]*>)//g')
+	CMD="curl -s https://go.dev/doc/install | grep \"rm -rf\" | sed -E 's/(\$ |<[\/a-zA-Z =\"-]*>)//g'"
 	sudo sh "$CMD"
 fi
 
@@ -228,15 +228,22 @@ _Install_Neovim() {
 	## Clonig my config from github plus my fork of friendly-snippets
 	__clone "https://github.com/adityastomar67/nvim-dots.git" "$NVIM_DIR"
 	__clone "https://github.com/adityastomar67/friendly-snippets.git" "$NVIM_DIR/bin/friendly-snippets"
-	__clone "https://github.com/adityastomar67/LuaSnip-snippets.nvim.git" "$TEMP_DIR/snips" && mv "$TEMP_DIR/snips/lua/luasnip_snippets" "$NVIM_DIR/bin/luasnippets"
+	__clone "https://github.com/adityastomar67/LuaSnip-snippets.nvim.git" "$TEMP_DIR/snips" \
+		&& mv "$TEMP_DIR/snips/lua/luasnip_snippets" "$NVIM_DIR/bin/luasnippets"
 }
 
 # NOTE: Needs to be worked on!!
 _Set_Wallpaper() {
+	url="https://www.github.com/adityastomar67/Wallpapers/"
 	__pkg_install feh
-	gum style --foreground 202 --border none 'Checkout Wallpapers @'
-	#  echo -e '\e]8;;http://example.com\aThis is a hyperlink\e]8;;\a'
-	echo -e '\e]8;;https://www.github.com/adityastomar67/Wallpapers/\e]8;;\a'
+	gum style --foreground 202 --border none "Checkout Wallpapers @ \"$url\""
+
+	choice=$(gum confirm "Open URL?")
+	if [[ $(uname) == "Linux" && $(choice) ]]; then
+		google-chrome-stable --no-sandbox $url
+	elif [[ $(uname) == "Darwin" && $(choice) ]]; then
+		open -a "Google Chrome" $url
+	fi
 
 	WALL=$(gum input --placeholder "Enter the Wallpaper Number: (or Type \"All\" to download full collection)")
 
@@ -279,6 +286,7 @@ _Set_Wallpaper() {
 		[ -f "$HOME/wall$WALL.jpg" ] && feh --no-fehbg --bg-fill "$HOME/wall$WALL.jpg" || feh --no-fehbg --bg-fill "$HOME/wall$WALL.png"
 	fi
 }
+
 ## Starting the execution
 if [ $# -gt 0 ]; then
 	case "$1" in
