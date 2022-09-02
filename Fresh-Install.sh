@@ -197,7 +197,7 @@ _Install_Neovim() {
 
 		if [[ "$NVIM_VERSION" == "Stable" ]]; then
 			mkdir -p ~/tmp
-			cd ~/tmp
+			cd ~/tmp || exit
 			curl -sLO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
 			sudo chmod u+x nvim.appimage
 			./nvim.appimage --appimage-extract
@@ -206,9 +206,9 @@ _Install_Neovim() {
 			sudo mv /squashfs-root/AppRun /usr/bin/nvim
 		else
 			mkdir -p ~/tmp
-			cd ~/tmp
+			cd ~/tmp || exit
 			git clone --quiet --depth 1 --branch nightly https://github.com/neovim/neovim.git
-			cd neovim
+			cd neovim || exit
 			make CMAKE_BUILD_TYPE=RelWithDebInfo
 			sudo make install
 		fi
@@ -228,8 +228,8 @@ _Install_Neovim() {
 	## Clonig my config from github plus my fork of friendly-snippets
 	__clone "https://github.com/adityastomar67/nvim-dots.git" "$NVIM_DIR"
 	__clone "https://github.com/adityastomar67/friendly-snippets.git" "$NVIM_DIR/bin/friendly-snippets"
-	__clone "https://github.com/adityastomar67/LuaSnip-snippets.nvim.git" "$TEMP_DIR/snips" \
-		&& mv "$TEMP_DIR/snips/lua/luasnip_snippets" "$NVIM_DIR/bin/luasnippets"
+	__clone "https://github.com/adityastomar67/LuaSnip-snippets.nvim.git" "$TEMP_DIR/snips" &&
+		mv "$TEMP_DIR/snips/lua/luasnip_snippets" "$NVIM_DIR/bin/luasnippets"
 }
 
 # NOTE: Needs to be worked on!!
@@ -252,7 +252,7 @@ _Set_Wallpaper() {
 		[ -d "$HOME/.config/wall/Wallpapers" ] && rm -rf ~/.config/wall/Wallpapers
 		mkdir -p "$HOME/.config/wall/"
 
-		cd ~/.config/wall/
+		cd ~/.config/wall/ || exit
 		if [ -f 'wall*' ]; then
 			command rm wall*
 		fi
@@ -299,6 +299,9 @@ if [ $# -gt 0 ]; then
 	-w | --wall)
 		_Set_Wallpaper
 		;;
+    -g | --grun)
+        _Install_GRUB
+        ;;
 	?)
 		echo "script usage: $(basename \$0) [-l] [-h] [-a somevalue]" >&2
 		exit 1
