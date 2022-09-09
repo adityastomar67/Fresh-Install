@@ -299,7 +299,10 @@ if [ $# -gt 0 ]; then
 	-w | --wall)
 		_Set_Wallpaper
 		;;
-    -g | --grun)
+    -z | --zsh)
+        _Install_ZSH
+        ;;
+    -g | --grub)
         _Install_GRUB
         ;;
 	?)
