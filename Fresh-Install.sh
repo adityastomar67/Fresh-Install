@@ -46,6 +46,10 @@ elif [[ $(uname) == "Darwin" ]]; then
 	PACKAGE_MANAGER="brew"
 fi
 
+_cleanup() {
+	[[ -d $TEMP_DIR ]] && rm -rf $TEMP_DIR
+}
+
 __pkg_install() {
 	LIST_OF_APPS=($(ls "/bin")+$(ls "/usr/bin"))
 	IFS="|"
@@ -158,6 +162,22 @@ _Install_Dependencies() {
 	fi
 }
 
+_Install_ZSH() {
+	gum style --foreground 202 --border-foreground 114 --border rounded --align center --width 40 --margin "0 2" --padding "1 2" 'Installing ZSH Configs...'
+
+	[[ $SHELL != *zsh ]] && gum style --foreground 202 --border none 'This is meant to be used with ZSH Shell'
+	! cat /etc/shells | grep -q "/usr/bin/zsh" && gum style --foreground 202 --border none 'ZSH Shell not Installed'
+
+	cnfrm=$(gum confirm "Do You Want to install ZSH SHELL?")
+    if [[ $cnfrm ]]; then
+       __pkg_install zsh
+    fi
+
+	__clone "https://github.com/adityastomar67/.dotfiles.git" "$TEMP_DIR/dots"
+	cp -r "$TEMP_DIR/dots/.dotfiles/zsh" "$HOME/zsh"
+	cp -r "$TEMP_DIR/dots/.dotfiles/zshrc" "$HOME/.zshrc"
+}
+
 _Install_GRUB() {
 	__clone "https://github.com/catppuccin/grub.git" "/tmp/repos" && cd "/tmp/repos/" || exit
 	sudo cp -r src/* /usr/share/grub/themes/
@@ -239,9 +259,9 @@ _Set_Wallpaper() {
 	gum style --foreground 202 --border none "Checkout Wallpapers @ \"$url\""
 
 	choice=$(gum confirm "Open URL?")
-	if [[ $(uname) == "Linux" && $(choice) ]]; then
+	if [[ $(uname) == "Linux" && $choice ]]; then
 		google-chrome-stable --no-sandbox $url
-	elif [[ $(uname) == "Darwin" && $(choice) ]]; then
+	elif [[ $(uname) == "Darwin" && $choice ]]; then
 		open -a "Google Chrome" $url
 	fi
 
@@ -299,12 +319,12 @@ if [ $# -gt 0 ]; then
 	-w | --wall)
 		_Set_Wallpaper
 		;;
-    -z | --zsh)
-        _Install_ZSH
-        ;;
-    -g | --grub)
-        _Install_GRUB
-        ;;
+	-z | --zsh)
+		_Install_ZSH
+		;;
+	-g | --grub)
+		_Install_GRUB
+		;;
 	?)
 		echo "script usage: $(basename \$0) [-l] [-h] [-a somevalue]" >&2
 		exit 1
@@ -313,3 +333,6 @@ if [ $# -gt 0 ]; then
 else
 	echo "No args"
 fi
+
+_cleanUp
+gum style --foreground 202 --border none "Done! Enjoy your new setup!"
