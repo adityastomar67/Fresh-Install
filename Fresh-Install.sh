@@ -9,7 +9,7 @@
 # TODO: Functionality to imply yes to all questions
 # TODO : Functionality to install packages from a file
 
-source ./bin/usage.sh
+# source ./bin/usage.sh
 
 # Directories
 mkdir -p /tmp/fresh-install
