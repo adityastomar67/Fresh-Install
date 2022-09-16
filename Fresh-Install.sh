@@ -224,7 +224,7 @@ _Install_Neovim() {
 			./squashfs-root/AppRun --version
 			sudo mv squashfs-root /
 			sudo mv /squashfs-root/AppRun /usr/bin/nvim
-		else
+		elsehttps://github.com/adityastomar67/nvdots
 			mkdir -p ~/tmp
 			cd ~/tmp || exit
 			git clone --quiet --depth 1 --branch nightly https://github.com/neovim/neovim.git
@@ -246,7 +246,7 @@ _Install_Neovim() {
 	[ -d "$NVIM_DIR" ] && mv $NVIM_DIR "$NVIM_DIR.backup"
 
 	## Clonig my config from github plus my fork of friendly-snippets
-	__clone "https://github.com/adityastomar67/nvim-dots.git" "$NVIM_DIR"
+	__clone "https://github.com/adityastomar67/nvdots.git" "$NVIM_DIR"
 	__clone "https://github.com/adityastomar67/friendly-snippets.git" "$NVIM_DIR/bin/friendly-snippets"
 	__clone "https://github.com/adityastomar67/LuaSnip-snippets.nvim.git" "$TEMP_DIR/snips" &&
 		mv "$TEMP_DIR/snips/lua/luasnip_snippets" "$NVIM_DIR/bin/luasnippets"
