@@ -185,6 +185,7 @@ _Install_ZSH() {
 
     [ -d "$HOME/zsh" ] && rm -rf "$HOME/zsh"
     [ -d "$HOME/.oh-my-zsh" ] && rm -rf "$HOME/.oh-my-zsh"
+    [ -d "$HOME/.local/share/zsh" ] && rm -rf "$HOME/.local/share/zsh"
     [ -f "$HOME/.zshrc" ] && rm -rf "$HOME/.zshrc"
 
 	__clone "https://github.com/adityastomar67/.dotfiles.git" "$TEMP_DIR/dots"
