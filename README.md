@@ -42,3 +42,4 @@ curl -sL https://bit.ly/Fresh-Install | sh -s -- <flags>
   - GUM by [Charmbracelet](https://charm.sh/)
   - Curl
   - Git
+  - [GO](https://go.dev/)
