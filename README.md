@@ -34,8 +34,8 @@ Usage: ./Fresh-Install.sh [Options...] <url>
  -w, --wall           Install Wallpapers
  -z, --zsh            Install zsh configs
 
-# Calling directly inside terminal
-curl -sL https://raw.githubusercontent.com/adityastomar67/Fresh-Install/master/Fresh-Install.sh | sh -s -- <flags>
+## Calling directly inside terminal
+curl -sL https://bit.ly/Fresh-Install | sh -s -- <flags>
  ```
 
 ## Dependencies
