@@ -19,6 +19,8 @@ TEMP_DIR="/tmp/fresh-install"
 NVIM_DIR="$HOME/.config/nvim"
 GITHUB="https://www.github.com/adityastomar67"
 
+[ -d $TEMP_DIR ] && rm -rf $TEMP_DIR
+
 ## Selection for Package Manager
 if [[ $(uname) == "Linux" ]]; then
 	PACKAGE_MANAGER=""
@@ -180,6 +182,9 @@ _Install_ZSH() {
     if [[ $cnfrm ]]; then
        __pkg_install zsh
     fi
+
+    [ -d "$HOME/zsh" ] && rm -rf "$HOME/zsh"
+    [ -f "$HOME/.zshrc" ] && rm -rf "$HOME/.zshrc"
 
 	__clone "https://github.com/adityastomar67/.dotfiles.git" "$TEMP_DIR/dots"
 	cp -r "$TEMP_DIR/dots/zsh" "$HOME/zsh"
