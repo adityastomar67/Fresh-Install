@@ -171,10 +171,10 @@ _Install_Dependencies() {
 }
 
 _Install_ZSH() {
-	_print 'style --foreground 202 --border-foreground 114 --border rounded --align center --width 40 --margin "0 2" --padding "1 2"' 'Installing ZSH Configs...'
+	_print "style --foreground 202 --border-foreground 114 --border rounded --align center --width 40 --margin \"0 2\" --padding \"1 2\"" "Installing ZSH Configs..."
 
 	[[ $SHELL != *zsh ]] && gum style --foreground 202 --border none 'This is meant to be used with ZSH Shell'
-	! cat /etc/shells | grep -q "/usr/bin/zsh" && gum style --foreground 202 --border none 'ZSH Shell not Installed'
+	! cat /etc/shells | grep -qE "\/bin\/zsh" && gum style --foreground 202 --border none 'ZSH Shell not Installed'
 
 	cnfrm=$(gum confirm "Do You Want to install ZSH SHELL?")
     if [[ $cnfrm ]]; then
