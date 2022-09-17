@@ -173,7 +173,7 @@ _Install_Dependencies() {
 }
 
 _Install_ZSH() {
-	_print "style --foreground 202 --border-foreground 114 --border rounded --align center --width 40 --margin \"0 2\" --padding \"1 2\"" "Installing ZSH Configs..."
+	_print " style --foreground 202 --border-foreground 114 --border rounded --align center --width 40 --margin \"0 2\" --padding \"1 2\"" "Installing ZSH Configs..."
 
 	[[ $SHELL != *zsh ]] && gum style --foreground 202 --border none 'This is meant to be used with ZSH Shell'
 	! cat /etc/shells | grep -qE "\/bin\/zsh" && gum style --foreground 202 --border none 'ZSH Shell not Installed'
@@ -184,6 +184,7 @@ _Install_ZSH() {
     fi
 
     [ -d "$HOME/zsh" ] && rm -rf "$HOME/zsh"
+    [ -d "$HOME/.oh-my-zsh" ] && rm -rf "$HOME/.oh-my-zsh"
     [ -f "$HOME/.zshrc" ] && rm -rf "$HOME/.zshrc"
 
 	__clone "https://github.com/adityastomar67/.dotfiles.git" "$TEMP_DIR/dots"
