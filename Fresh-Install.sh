@@ -182,7 +182,7 @@ _Install_ZSH() {
     fi
 
 	__clone "https://github.com/adityastomar67/.dotfiles.git" "$TEMP_DIR/dots"
-	cp -r "$TEMP_DIR/dots/.dotfiles/zsh" "$HOME/zsh"
+	cp -r "$TEMP_DIR/dots/zsh" "$HOME/zsh"
     source "$HOME/zsh/.zshrc"
 }
 
