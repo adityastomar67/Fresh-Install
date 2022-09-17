@@ -50,6 +50,14 @@ _cleanup() {
 	[[ -d $TEMP_DIR ]] && rm -rf $TEMP_DIR
 }
 
+_print() {
+    if [[ $(command -v gum) ]]; then
+        gum $1 $2
+    else
+        echo $2
+    fi
+}
+
 __pkg_install() {
 	LIST_OF_APPS=($(ls "/bin")+$(ls "/usr/bin"))
 	IFS="|"
@@ -163,7 +171,7 @@ _Install_Dependencies() {
 }
 
 _Install_ZSH() {
-	gum style --foreground 202 --border-foreground 114 --border rounded --align center --width 40 --margin "0 2" --padding "1 2" 'Installing ZSH Configs...'
+	_print 'style --foreground 202 --border-foreground 114 --border rounded --align center --width 40 --margin "0 2" --padding "1 2"' 'Installing ZSH Configs...'
 
 	[[ $SHELL != *zsh ]] && gum style --foreground 202 --border none 'This is meant to be used with ZSH Shell'
 	! cat /etc/shells | grep -q "/usr/bin/zsh" && gum style --foreground 202 --border none 'ZSH Shell not Installed'
