@@ -53,11 +53,11 @@ _cleanup() {
 }
 
 _print() {
-    if [[ $(command -v gum) ]]; then
-        gum $1 $2
-    else
-        echo $2
-    fi
+	if [[ $(command -v gum) ]]; then
+		echo $1 $2 | xargs gum
+	else
+		echo $2
+	fi
 }
 
 __pkg_install() {
@@ -173,25 +173,23 @@ _Install_Dependencies() {
 }
 
 _Install_ZSH() {
-	_print " style --foreground 202 --border-foreground 114 --border rounded --align center --width 40 --margin \"0 2\" --padding \"1 2\"" "Installing ZSH Configs..."
+	_print "style --foreground 202 --border-foreground 114 --border rounded --align center --width 40 --margin \"0 2\" --padding \"1 2\"" "Installing ZSH Configs..."
 
 	[[ $SHELL != *zsh ]] && gum style --foreground 202 --border none 'This is meant to be used with ZSH Shell'
-	! cat /etc/shells | grep -qE "\/bin\/zsh" && gum style --foreground 202 --border none 'ZSH Shell not Installed'
+	! cat /etc/shells | grep -qE "\/bin\/zsh" && gum style --foreground 202 --border none 'ZSH Shell not Installed' && cnfrm=$(gum confirm "Do You Want to install ZSH SHELL?")
 
-	cnfrm=$(gum confirm "Do You Want to install ZSH SHELL?")
-    if [[ $cnfrm ]]; then
-       __pkg_install zsh
-    fi
+	if [[ $cnfrm ]]; then
+		__pkg_install zsh
+	fi
 
-    [ -d "$HOME/zsh" ] && rm -rf "$HOME/zsh"
-    [ -d "$HOME/.oh-my-zsh" ] && rm -rf "$HOME/.oh-my-zsh"
-    [ -d "$HOME/.zinit" ] && rm -rf "$HOME/.zinit"
-    [ -f "$HOME/.zshrc" ] && rm -rf "$HOME/.zshrc"
+	[ -d "$HOME/zsh" ] && rm -rf "$HOME/zsh"
+	[ -d "$HOME/.oh-my-zsh" ] && rm -rf "$HOME/.oh-my-zsh"
+	[ -d "$HOME/.zinit" ] && rm -rf "$HOME/.zinit"
+	[ -f "$HOME/.zshrc" ] && rm -rf "$HOME/.zshrc"
 
 	__clone "https://github.com/adityastomar67/.dotfiles.git" "$TEMP_DIR/dots"
 	cp -r "$TEMP_DIR/dots/zsh" "$HOME/zsh"
-    source "$HOME/zsh/.zshrc"
-    zsh
+	source "$HOME/zsh/.zshrc"
 }
 
 _Install_GRUB() {
@@ -240,7 +238,7 @@ _Install_Neovim() {
 			./squashfs-root/AppRun --version
 			sudo mv squashfs-root /
 			sudo mv /squashfs-root/AppRun /usr/bin/nvim
-		elsehttps://github.com/adityastomar67/nvdots
+			elsehttps://github.com/adityastomar67/nvdots
 			mkdir -p ~/tmp
 			cd ~/tmp || exit
 			git clone --quiet --depth 1 --branch nightly https://github.com/neovim/neovim.git
