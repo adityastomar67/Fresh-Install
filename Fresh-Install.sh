@@ -216,7 +216,7 @@ _Install_Dots() {
 	done <"$list"
 
 	## Stowing dots
-	cd "HOME/.dotfiles" || exit
+	cd "$HOME/.dotfiles" || exit
 	stow .
 }
 
