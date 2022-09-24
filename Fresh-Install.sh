@@ -206,11 +206,13 @@ _Install_GRUB() {
 _Install_Dots() {
 	## Checking if Stow is Installed
 	if [[ ! $(command -v stow) ]]; then
-		sudo pacman -S stow --noconfirm
+		__pkg_install stow
 	fi
 
+    __clone "https://github.com/adityastomar67/.dotfiles.git" $HOME
+
 	## Making Backups
-	list="./bin/text.txt"
+	list="$HOME/.dotfiles/bin/file.txt"
 	while IFS= read -r item; do
 		mv "$item" "$item.backup"
 	done <"$list"
