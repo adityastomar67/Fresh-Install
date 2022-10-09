@@ -1,6 +1,5 @@
-castnow-git
-llvm
 amfora
+ytfzf
 arc-gtk-theme
 aria2
 base
@@ -12,6 +11,7 @@ bluez-tools
 brave-bin
 broot
 btop
+castnow-git
 ccls
 cheese
 cmatrix
@@ -36,6 +36,8 @@ gnuplot
 google-chrome
 htop
 joplin-desktop-bin
+jq
+jqp
 lazygit
 libmp4v2
 libxft-bgra
@@ -45,6 +47,7 @@ libzip
 linux
 linux-firmware
 linux-headers
+llvm
 lua
 lvim
 make
