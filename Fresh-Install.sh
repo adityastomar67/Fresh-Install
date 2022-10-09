@@ -209,7 +209,7 @@ _Install_Dots() {
 		__pkg_install stow
 	fi
 
-    __clone "https://github.com/adityastomar67/.dotfiles.git" $HOME
+	__clone "https://github.com/adityastomar67/.dotfiles.git" $HOME
 
 	## Making Backups
 	list="$HOME/.dotfiles/bin/file.txt"
@@ -240,7 +240,8 @@ _Install_Neovim() {
 			./squashfs-root/AppRun --version
 			sudo mv squashfs-root /
 			sudo mv /squashfs-root/AppRun /usr/bin/nvim
-			elsehttps://github.com/adityastomar67/nvdots
+		else
+			https://github.com/adityastomar67/nvdots
 			mkdir -p ~/tmp
 			cd ~/tmp || exit
 			git clone --quiet --depth 1 --branch nightly https://github.com/neovim/neovim.git
@@ -256,7 +257,7 @@ _Install_Neovim() {
 	sudo npm install -g typescript typescript-language-server vscode-langservers-extracted vls @tailwindcss/language-server yaml-language-server @prisma/language-server emmet-ls neovim graphql-language-service-cli graphql-language-service-server @astrojs/language-server bash-language-server prettier
 
 	## Installing Node Dependencies
-	sudo pacman -S lua-language-server pyright deno rust-analyzer gopls shellcheck shfmt stylua autopep8 --noconfirm
+	sudo pacman -S --noconfirm lua-language-server pyright deno rust-analyzer gopls shellcheck shfmt stylua autopep8
 
 	## Making Backup of current config
 	[ -d "$NVIM_DIR" ] && mv $NVIM_DIR "$NVIM_DIR.backup"
