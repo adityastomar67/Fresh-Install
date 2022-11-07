@@ -1,3 +1,4 @@
+#!/usr/bin/env sh
 # ===  MY ARCH SETUP INSTALLER ===  #
 
 #== part1== #
