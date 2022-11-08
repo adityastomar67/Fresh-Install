@@ -29,8 +29,9 @@
 ```bash
 Usage: ./Fresh-Install.sh [Options...] <url>
  -d, --dots           Install various config files
- -n, --nvim           Install only configs Related to Neovim
  -g, --grub           Install GRUB Theme
+ -n, --nvim           Install only configs Related to Neovim
+ -s, --st             Install only configs Related to st
  -w, --wall           Install Wallpapers
  -z, --zsh            Install zsh configs
 
