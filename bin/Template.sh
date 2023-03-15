@@ -1,11 +1,17 @@
 #!/usr/bin/env bash
+# ▀█▀ █▀▀ █▀▄▀█ █▀█ █   ▄▀█ ▀█▀ █▀▀   █▀ █ █
+#  █  ██▄ █ ▀ █ █▀▀ █▄▄ █▀█  █  ██▄ ▄ ▄█ █▀█
 
+# By: https://github.com/adityastomar67
+
+##--> Entry Point of the script <--##
 _mainScript_() {
 
 	echo -e "hello world"
 
-} # end _mainScript_
+}
 
+##--> Variables & Flags <--##
 # Set initial flags
 quiet=false
 LOGLEVEL=WARN
@@ -46,6 +52,7 @@ else
 	underline="\033[4;37m"
 fi
 
+##--> Functionalities <--##
 _alert_() {
 	# DESC:   Controls all printing of messages to log files and stdout.
 	# ARGS:   $1 (required) - The type of alert to print
@@ -170,7 +177,7 @@ _alert_() {
 		;;
 	esac
 
-} # /_alert_
+}
 
 error() { _alert_ error "${1}" "${2-}"; }
 warning() { _alert_ warning "${1}" "${2-}"; }
@@ -279,7 +286,7 @@ _makeTempDir_() {
 	# OUTS:   $tmpDir       - Temporary directory
 	# USAGE:  _makeTempDir_ "$(basename "$0")"
 
-	[ -d "${tmpDir:-}" ] && return 0
+	[ -d "${tmpDir:-$1}" ] && return 0
 
 	if [ -n "${1-}" ]; then
 		tmpDir="${TMPDIR:-/tmp/}${1}.$RANDOM.$RANDOM.$$"
@@ -593,21 +600,33 @@ _functionStack_() {
 	printf ' )\n'
 }
 
-__CheckMachine() {
+_checkMachine_() {
+	# DESC:   Checks whether this is a VirtualBox, VMWare, or Physical Machine
+	# ARGS:   Not Required
+	# OPTS:   -p            - To give verbose
+	# OUTS:   Prints whether the machine is a virtual machine or a physical machine.
+
 	if dmesg | grep -i "VBOX HARDDISK" >/dev/null; then
-		Virtual=1
+		virtual=1
 		Msg="This is a virtual machine running under VirtualBox"
 	elif dmesg | grep -i "vmware" >/dev/null; then
-		Virtual=1
+		virtual=1
 		Msg="This is a virtual machine running under VMWare"
 	else
-		Virtual=0
+		virtual=0
 		Msg="Good....This is a physical machine, Not a VBOX or a Virtual Machine."
 	fi
-	PrintMsg
-} # To Check whether this is a VirtualBox, VMWare, or Physical Machine.
 
-__GetInfo() {
+	if $virtual -eq 1; then
+		warning $Msg
+	else
+		success $Msg
+	fi
+}
+
+_getSystemInfo() {
+	# DESC:   Get & Set Information about System to the variables
+	# ARGS:   Not Required
 
 	# Check Kernel Release
 	Kernel=$(uname -r)
@@ -616,33 +635,36 @@ __GetInfo() {
 	cat /etc/*-release | grep 'NAME\|VERSION' | grep -v 'VERSION_ID' | grep -v 'PRETTY_NAME' >/tmp/osrelease
 	Distro=$(cat /tmp/osrelease | grep -v "VERSION" | cut -f2 -d "=")
 	CurrentRelease=$(cat /tmp/osrelease | grep -v "NAME" | cut -f2 -d "=")
-	rm /tmp/osrelease
+	rm -rf /tmp/osrelease
 
 	# Check System Architecture
 	arch=$(uname -m)
+} 
 
-	#* Now lets find out about Package Manager
-	PkgMgr="sudo $(cd Data && chmod +x pkgmngrcheck.sh && ./pkgmngrcheck.sh | cut -d " " -f3)"
+_clone_() {
+	# DESC:   Clones from the repository to either the path provided or pwd
+	# ARGS:   $1 (Required) - URL of the repository
+	#		  $2 (Optional) - Directory to be cloned in
+	# OUTS:   Nothing
 
-} # To Get & Set Information about System
-
-__Clone() {
-
-	# For Setting Up the configuration Files
-	git clone git@github.com:adityastomar67/.dotfiles.git
+	if [ -d "$2" ]; then
+		error "Directory $2 already exists"
+		return
+	fi
+	git clone --quiet "$1" "$2"
 }
 
-# Initialize and run the script
-# trap '_trapCleanup_ $LINENO $BASH_LINENO "$BASH_COMMAND" "${FUNCNAME[*]}" "$0" "${BASH_SOURCE[0]}"' \
-#     EXIT INT TERM SIGINT SIGQUIT
-# set -o errtrace                           # Trap errors in subshells and functions
-# set -o errexit                            # Exit on error. Append '||true' if you expect an error
-# set -o pipefail                           # Use last non-zero exit code in a pipeline
-# shopt -s nullglob globstar                # Make `for f in *.txt` work when `*.txt` matches zero files
-# IFS=$' \n\t'                              # Set IFS to preferred implementation
-# set -o xtrace                             # Run in debug mode
-# set -o nounset                            # Disallow expansion of unset variables
-# [[ $# -eq 0 ]] && _parseOptions_ "-h"     # Force arguments when invoking the script
-# _parseOptions_ "$@"                       # Parse arguments passed to script
-# _makeTempDir_ "$(basename "$0")"          # Create a temp directory '$tmpDir'
-# _acquireScriptLock_                       # Acquire script lock
+##--> Initialize and run the script <--##
+trap '_trapCleanup_ $LINENO $BASH_LINENO "$BASH_COMMAND" "${FUNCNAME[*]}" "$0" "${BASH_SOURCE[0]}"' \
+    EXIT INT TERM SIGINT SIGQUIT
+set -o errtrace                           # Trap errors in subshells and functions
+set -o errexit                            # Exit on error. Append '||true' if you expect an error
+set -o pipefail                           # Use last non-zero exit code in a pipeline
+shopt -s nullglob globstar                # Make `for f in *.txt` work when `*.txt` matches zero files
+IFS=$' \n\t'                              # Set IFS to preferred implementation
+set -o xtrace                             # Run in debug mode
+set -o nounset                            # Disallow expansion of unset variables
+[[ $# -eq 0 ]] && _parseOptions_ "-h"     # Force arguments when invoking the script
+_parseOptions_ "$@"                       # Parse arguments passed to script
+_makeTempDir_ "$(basename "$0")"          # Create a temp directory '$tmpDir'
+_acquireScriptLock_                       # Acquire script lock
