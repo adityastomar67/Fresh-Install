@@ -44,3 +44,4 @@ curl -sL https://bit.ly/Fresh-Install | sh -s -- <flags>
 ## Dependencies
  - curl
  - git
+ - [Arch-I](https://github.com/adityastomar67/Arch-I)
