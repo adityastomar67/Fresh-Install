@@ -129,11 +129,7 @@ fi
 
 ##--> Functionalities <--##
 _makeTempDir_() {
-	# DESC:   Creates a temp direcrtory to house temporary files
-	# ARGS:   $1 (Optional) - First characters/word of directory name
-	# OUTS:   $tmpDir       - Temporary directory
-	# USAGE:  _makeTempDir_ "$(basename "$0")"
-
+	
 	[ -d "${tmpDir:-$1}" ] && return 0
 
 	if [ -n "${1-}" ]; then
@@ -145,6 +141,15 @@ _makeTempDir_() {
 		# fatal "Could not create temporary directory! Exiting."
 	}
 	# verbose "\$tmpDir=$tmpDir"
+}
+
+_clone_() {
+
+	if [ -d "$2" ]; then
+		error "Directory $2 already exists"
+		return
+	fi
+	git clone --quiet "$1" "$2"
 }
 
 _pkgInstall_() {
