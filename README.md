@@ -40,7 +40,5 @@ curl -sL https://bit.ly/Fresh-Install | sh -s -- <flags>
  ```
 
 ## Dependencies
- - GUM by [Charmbracelet](https://charm.sh/)
  - curl
  - git
-

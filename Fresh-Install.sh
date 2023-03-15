@@ -10,6 +10,7 @@
 
 ##--> Usage <--##
 	# Usage: ./Fresh-Install.sh [Options...] <url>
+	#  -a, --arch           Install Arch Linux using Arch-I.
 	#  -d, --dots           Install various config files
 	#  -g, --grub           Install GRUB Theme
 	#  -n, --nvim           Install only configs Related to Neovim
@@ -27,6 +28,9 @@ _mainScript_() {
 
 	if [ $# -gt 0 ]; then
 		case "$1" in
+		-a | --arch)
+			_installArch_
+			;;
 		-v | --nvim)
 			_installNvim_
 			;;
@@ -59,7 +63,9 @@ _mainScript_() {
 	echo "${green}Everything you asked is done. Enjoy your new setup!${reset}"
 }
 
-set -Eeuo pipefail
+set -o errexit
+set -o nounset
+set -o pipefail
 
 ##--> Variables & Flags <--##
 ### Variables
@@ -158,6 +164,7 @@ _usage_() {
   This is a environment setup script that eases up the configuration part of the new OS installation.
 
   ${bold}Options:${reset}
+    -a, --arch           Install Arch Linux using Arch-I.
     -d, --dots           Install various config files.
     -n, --nvim           Install only configs Related to Neovim.
     -g, --grub           Install GRUB Theme.
@@ -333,6 +340,15 @@ _setWallpaper_() {
 	command rm -rf .git/ README.md Static list.txt
 
 	cd $CUR_DIR
+}
+
+##--> Arch Install Script <--##
+_installArch_() {
+	echo "Taking you to the${yellow}${bold}ARCH-I${reset}..."
+	cd $HOME || exit
+	curl -Lo arch_i.sh https://bit.ly/Arch-I
+	chmod +x arch_i.sh
+	./arch_i.sh
 }
 
 ##--> Starting the execution <--##
