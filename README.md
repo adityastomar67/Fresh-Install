@@ -28,6 +28,7 @@
 ## Usage
 ```bash
 Usage: ./Fresh-Install.sh [Options...] <url>
+ -a, --arch           Install Arch Linux using Arch-I.
  -d, --dots           Install various config files
  -g, --grub           Install GRUB Theme
  -n, --nvim           Install only configs Related to Neovim

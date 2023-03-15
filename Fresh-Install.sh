@@ -70,7 +70,7 @@ _mainScript_() {
 ##--> Variables & Flags <--##
 ### Variables
 SCRIPT_NAME="fresh-install"
-SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
+SCRIPT_DIR=$(cd "$(dirname "$BASH_SOURCE[0]")" &>/dev/null && pwd -P)
 NVIM_DIR="$HOME/.config/nvim"
 GITHUB_URL="https://www.github.com/adityastomar67"
 DOTS_URL="$GITHUB_URL/.dotfiles.git"
