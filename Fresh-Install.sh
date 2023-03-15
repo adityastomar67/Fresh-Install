@@ -14,6 +14,7 @@
 	#  -d, --dots           Install various config files
 	#  -g, --grub           Install GRUB Theme
 	#  -n, --nvim           Install only configs Related to Neovim
+	#  -r, --deps           Install all the dependencies
 	#  -s, --st             Install only configs Related to st
 	#  -w, --wall           Install Wallpapers
 	#  -z, --zsh            Install zsh configs
@@ -45,6 +46,9 @@ _mainScript_() {
 			;;
 		-g | --grub)
 			_installGrub_
+			;;
+		-r | --deps)
+		    _installDeps_
 			;;
 		-h | --help)
 			_usage_
@@ -129,7 +133,6 @@ fi
 
 ##--> Functionalities <--##
 _makeTempDir_() {
-	
 	[ -d "${tmpDir:-$1}" ] && return 0
 
 	if [ -n "${1-}" ]; then
@@ -138,18 +141,20 @@ _makeTempDir_() {
 		tmpDir="${TMPDIR:-/tmp/}$(basename "$0")"
 	fi
 	(umask 077 && mkdir -p "${tmpDir}") || {
-		# fatal "Could not create temporary directory! Exiting."
+		echo "${red}Could not create temporary directory! Exiting.${reset}"
 	}
-	# verbose "\$tmpDir=$tmpDir"
 }
 
 _clone_() {
-
-	if [ -d "$2" ]; then
-		error "Directory $2 already exists"
-		return
+	if [ $# -gt 1 ]; then
+		if [ -d "$2" ]; then
+			error "Directory $2 already exists"
+			return
+		fi
+		git clone --quiet "$1" "$2"
+	else
+		git clone --quiet "$1"
 	fi
-	git clone --quiet "$1" "$2"
 }
 
 _pkgInstall_() {
@@ -172,6 +177,7 @@ _usage_() {
     -a, --arch           Install Arch Linux using Arch-I.
     -d, --dots           Install various config files.
     -n, --nvim           Install only configs Related to Neovim.
+	-r, --deps           Install all the dependencies
     -g, --grub           Install GRUB Theme.
     -w, --wall           Install Wallpapers.
     -m, --menu           Show other options.
@@ -263,13 +269,13 @@ _installNvim_() {
 			sudo mv squashfs-root /
 			sudo mv /squashfs-root/AppRun /usr/bin/nvim
 		else
-			_clone_ "--depth 1 --branch nightly https://github.com/neovim/neovim.git"
+			git clone --quiet --depth 1 --branch nightly https://github.com/neovim/neovim.git
 			cd neovim || exit
 			make CMAKE_BUILD_TYPE=RelWithDebInfo
 			sudo make install
 		fi
 	else
-		echo '${green}Neovim is installed. Installing configs...${reset}'
+		echo "${green}Neovim is installed. Installing configs...${reset}"
 	fi
 
     ## Back up current config
@@ -280,10 +286,10 @@ _installNvim_() {
     [ -d "$HOME/.local/state/nvim" ] && mv "$HOME/.local/state/nvim" "$HOME/.local/state/nvim.backup"
     [ -d "$HOME/.cache/nvim" ]       && mv "$HOME/.cache/nvim"       "$HOME/.cache/nvim.backup"
 
-    _clone_ "$GITHUB_URL/LazyNV.git" $NEOVIM_DIR
+    _clone_ "$GITHUB_URL/LazyNV.git" $NVIM_DIR
 
     # Remove git related files
-    rm -rf "$NEOVIM_DIR/.git"
+    rm -rf "$NVIM_DIR/.git"
 }
 
 _installDots_() {
@@ -345,6 +351,64 @@ _setWallpaper_() {
 	command rm -rf .git/ README.md Static list.txt
 
 	cd $CUR_DIR
+}
+
+_installDeps_() {
+	## Installing Basic Dependencies
+	__basic_dep() {
+		list="./requirements/list.pacman"
+		while IFS= read -r app; do
+			__pkg_install $app
+		done <"$list"
+	}
+
+	## Installing Node Dependencies
+	__node_dep() {
+		list="./requirements/list.node"
+		while IFS= read -r app; do
+			__pkg_install $app
+		done <"$list"
+	}
+
+	## Installing Pip Dependencies
+	__pip_dep() {
+		list="./requirements/list.pip"
+		while IFS= read -r app; do
+			__pkg_install $app
+		done <"$list"
+	}
+
+	## Installing Git Dependencies
+	__git_dep() {
+		list="./requirements/list.git"
+		while IFS= read -r app; do
+			__pkg_install $app
+		done <"$list"
+	}
+
+	## Calling Functions
+	if [ $# -gt 0 ]; then
+		case "$1" in
+		-b)
+			__basic_dep
+			;;
+		-n)
+			__node_dep
+			;;
+		-g)
+			__git_dep
+			;;
+		-p)
+			__pip_dep
+			;;
+		-a)
+			__basic_dep
+			__git_dep
+			__node_dep
+			__pip_dep
+			;;
+		esac
+	fi
 }
 
 ##--> Arch Install Script <--##
