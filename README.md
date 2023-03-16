@@ -47,4 +47,4 @@ curl -sL https://bit.ly/Fresh-Install | sh -s -- <flags>
  - [Arch-I](https://github.com/adityastomar67/Arch-I)
 
  ## Todo
-  [] - Check for every functionality
+ - [ ] Check for every functionality
