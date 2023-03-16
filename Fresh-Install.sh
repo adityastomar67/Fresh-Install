@@ -6,8 +6,6 @@
 # |_|  |_|  \___||___/_| |_|    |___|_| |_|___/\__\__,_|_|_(_)___/_| |_|
 # Made for Arch Linux
 
-# TODO: Functionality to install packages from a file
-
 ##--> Usage <--##
 	# Usage: ./Fresh-Install.sh [Options...] <url>
 	#  -a, --arch           Install Arch Linux using Arch-I.
@@ -366,7 +364,7 @@ _installDeps_() {
 	__node_dep() {
 		list="./requirements/list.node"
 		while IFS= read -r app; do
-			__pkg_install $app
+			npm i $app
 		done <"$list"
 	}
 
@@ -374,7 +372,7 @@ _installDeps_() {
 	__pip_dep() {
 		list="./requirements/list.pip"
 		while IFS= read -r app; do
-			__pkg_install $app
+			python3 -m pip install --user $app
 		done <"$list"
 	}
 
@@ -382,7 +380,7 @@ _installDeps_() {
 	__git_dep() {
 		list="./requirements/list.git"
 		while IFS= read -r app; do
-			__pkg_install $app
+			${$app}
 		done <"$list"
 	}
 
