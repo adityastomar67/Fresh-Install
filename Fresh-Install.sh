@@ -22,7 +22,7 @@
 
 ##--> Main Entry Point of the script <--##
 _mainScript_() {
-
+	_header_
     _makeTempDir_ $SCRIPT_NAME
 
 	if [ $# -gt 0 ]; then
@@ -174,12 +174,13 @@ _usage_() {
   ${bold}Options:${reset}
     -a, --arch           Install Arch Linux using Arch-I.
     -d, --dots           Install various config files.
+    -g, --grub           Install GRUB Theme.
+	-h, --help           Show Usage/help.
     -n, --nvim           Install only configs Related to Neovim.
 	-r, --deps           Install all the dependencies
-    -g, --grub           Install GRUB Theme.
-    -w, --wall           Install Wallpapers.
+	-s, --st             Install only configs Related to st
     -m, --menu           Show other options.
-	-h, --help           Show Usage/help.
+    -w, --wall           Install Wallpapers.
 
 EOF
 }
@@ -396,7 +397,7 @@ _installDeps_() {
 	__git_dep() {
 		list="./requirements/list.git"
 		while IFS= read -r app; do
-			${$app}
+			${app}
 		done <"$list"
 	}
 
