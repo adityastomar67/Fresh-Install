@@ -290,6 +290,22 @@ _installNvim_() {
     rm -rf "$NVIM_DIR/.git"
 }
 
+_installST_() {
+	echo "${blue}${bold}Installing Suckless Terminal...${reset}"
+
+	_clone_ "$GITHUB_URL/.dotfiles.git" "$tmpDir/dots"
+    cp -r "$tmpDir/dots/.config/st" "$HOME/.config/st"
+
+    cd "$HOME/.config/st" || return
+
+	sudo make clean install
+	xrdb merge ./xresources
+
+	if [ -f "$HOME/.temp_src" ]; then
+		echo 'alias rel="xrdb merge pathToXresourcesFile && kill -USR1 $(pidof st)"' >> $HOME/.temp_src
+	fi
+}
+
 _installDots_() {
 	## Checking if Stow is Installed
 	_pkgInstall_ "stow"
