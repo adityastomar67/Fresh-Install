@@ -223,22 +223,22 @@ _installZsh_() {
 }
 
 _installGrub_() {
-	local TYPE
+	# local TYPE
     _clone_ "https://github.com/AllJavi/tartarus-grub.git" "/tmp/GRUB/tartarus" && sudo cp -r /tmp/GRUB/tartarus/tartarus /usr/share/grub/themes/
 	_clone_ "https://github.com/catppuccin/grub.git" "/tmp/GRUB/catppuccin"     && sudo cp -r /tmp/GRUB/catppuccin/src/* /usr/share/grub/themes/
 
 	echo "Which GRUB Theme you want?: "
-    select TYPE in "catppuccin-latte" "catppuccin-frappe" "catppuccin-macchiato" "catppuccin-mocha" "tartarus"; do
-        if [ $TYPE ]; then
+    select typ in "catppuccin-latte" "catppuccin-frappe" "catppuccin-macchiato" "catppuccin-mocha" "tartarus"; do
+        if [ $typ ]; then
             break
         fi
     done
 
-	if [[ $TYPE == "tartarus" ]]; then
-		THEME="GRUB_THEME='/usr/share/grub/themes/$TYPE/theme.txt'"
+	if [[ $typ == "tartarus" ]]; then
+		THEME="GRUB_THEME='/usr/share/grub/themes/$typ/theme.txt'"
 		sudo sed -r -i "s/GRUB_THEME=\"([/.-][a-z]\w+)*\"/$THEME/" /etc/default/grub
 	else
-		THEME="GRUB_THEME='/usr/share/grub/themes/$TYPE-grub-theme/theme.txt'"
+		THEME="GRUB_THEME='/usr/share/grub/themes/$typ-grub-theme/theme.txt'"
 		sudo sed -r -i "s/GRUB_THEME=\"([/.-][a-z]\w+)*\"/$THEME/" /etc/default/grub
 	fi
 
