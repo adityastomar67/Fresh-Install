@@ -436,4 +436,4 @@ _installArch_() {
 }
 
 ##--> Starting the execution <--##
-_mainScript_
+_mainScript_ $1
