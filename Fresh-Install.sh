@@ -146,7 +146,8 @@ _makeTempDir_() {
 _clone_() {
 	if [ $# -gt 1 ]; then
 		if [ -d "$2" ]; then
-			error "Directory $2 already exists"
+			# TODO: Create error command
+			# error "Directory $2 already exists"
 			return
 		fi
 		git clone --quiet "$1" "$2"
