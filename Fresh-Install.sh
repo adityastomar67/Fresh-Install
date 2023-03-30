@@ -255,17 +255,17 @@ _installNvim_() {
         echo "${yellow}Installing Neovim binary..."
 
         echo "Choose between : "
-        select NVIM_VERSION in "Stable" "Nightly"; do
-            if [ $NVIM_VERSION ]; then
+        select VERSION in "Stable" "Nightly"; do
+            if [ $VERSION ]; then
                 break
             fi
         done
-		printf "\nInstalling %s version...\n" "$NVIM_VERSION"
+		printf "\nInstalling %s version...\n" "$VERSION"
 
         _makeTempDir_ "neovim"
         cd ${tmpDir} || exit
 
-		if [[ $NVIM_VERSION = "Stable" ]]; then
+		if [[ $VERSION = "Stable" ]]; then
 			curl -sLO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
 			sudo chmod u+x nvim.appimage
 			./nvim.appimage --appimage-extract
