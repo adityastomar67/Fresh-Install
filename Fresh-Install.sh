@@ -260,21 +260,22 @@ _installNvim_() {
         #         break
         #     fi
         # done
+		
+		PS3="Choose between :"
 
-		echo "Choose between two : "
-    	select drive in "Stable" "Nightly"
-    	do
-			if [ $drive ]; then
-				break
-			fi
-    	done
+		select version in Stable Nightly
+		do
+			echo "Selected character: $character"
+			echo "Selected number: $REPLY"
+		done
 
-		# printf "\nInstalling %s version...\n" "$VERSION"
+
+		printf "\nInstalling %s version...\n" "$version"
 
         _makeTempDir_ "neovim"
         cd ${tmpDir} || exit
 
-		if [[ $drive = "Stable" ]]; then
+		if [[ $version = "Stable" ]]; then
 			curl -sLO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
 			sudo chmod u+x nvim.appimage
 			./nvim.appimage --appimage-extract
