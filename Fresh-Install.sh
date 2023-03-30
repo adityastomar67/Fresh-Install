@@ -23,7 +23,7 @@
 ##--> Main Entry Point of the script <--##
 _mainScript_() {
 	_header_
-    _makeTempDir_ $SCRIPT_NAME
+    # _makeTempDir_ $SCRIPT_NAME
 
 	if [ $# -gt 0 ]; then
 		case "$1" in
