@@ -261,6 +261,8 @@ _installNvim_() {
         #     fi
         # done
 
+		local VERSION=""
+
 		PS3='Please enter your choice: '
 		options=("Stable" "Nightly" "Quit")
 		select VERSION in "${options[@]}"
