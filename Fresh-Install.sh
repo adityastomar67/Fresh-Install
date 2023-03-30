@@ -33,6 +33,9 @@ _mainScript_() {
 		-v | --nvim)
 			_installNvim_
 			;;
+		--LazyNV)
+			_installLazyNV_
+			;;
 		-d | --dots)
 			_installDots_
 			;;
@@ -291,6 +294,29 @@ _installNvim_() {
 
     # Remove git related files
     rm -rf "$NVIM_DIR/.git"
+}
+
+_installLazyNV_() {
+	NEOVIM_DIR=$HOME/.config/nvim
+	export NEOVIM_DIR
+
+	## Back up current config
+	[ -d $NEOVIM_DIR ] && mv $NEOVIM_DIR "$NEOVIM_DIR.backup"
+
+	## Optional but recommended
+	[ -d "$HOME/.local/share/nvim" ] && rm -rf "$HOME/.local/share/nvim"
+	[ -d "$HOME/.local/state/nvim" ] && rm -rf "$HOME/.local/state/nvim"
+	[ -d "$HOME/.cache/nvim" ]       && rm -rf "$HOME/.cache/nvim"
+
+	# Create config directory
+	mkdir -p $NEOVIM_DIR
+	git clone https://github.com/adityastomar67/LazyNV.git $NEOVIM_DIR
+
+	# Remove git related files
+	rm -rf ~/.config/nvim/.git
+
+	## Run Neovim for the initial setup
+	cd $HOME && nvim
 }
 
 _installST_() {
