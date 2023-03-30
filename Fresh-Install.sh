@@ -254,12 +254,21 @@ _installNvim_() {
    	    echo "${red}Neovim not Installed${reset}"
         echo "${yellow}Installing Neovim binary..."
 
-        printf "Choose between : \n"
-        select VERSION in "Stable" "Nightly"; do
-            if [ $VERSION ]; then
-                break
-            fi
-        done
+        # printf "Choose between : \n"
+        # select VERSION in "Stable" "Nightly"; do
+        #     if [ $VERSION ]; then
+        #         break
+        #     fi
+        # done
+
+		echo "Choose between : "
+    	select drive in "Stable" "Nightly"
+    	do
+			if [ $drive ]; then
+				break
+			fi
+    	done
+
 		printf "\nInstalling %s version...\n" "$VERSION"
 
         _makeTempDir_ "neovim"
