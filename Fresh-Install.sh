@@ -75,7 +75,6 @@ set -o pipefail
 ##--> Variables & Flags <--##
 ### Variables
 SCRIPT_NAME="fresh-install"
-# SCRIPT_DIR=$(cd "$(dirname "$BASH_SOURCE[0]")" &>/dev/null && pwd -P)
 NVIM_DIR="$HOME/.config/nvim"
 GITHUB_URL="https://www.github.com/adityastomar67"
 DOTS_URL="$GITHUB_URL/.dotfiles.git"
@@ -253,31 +252,7 @@ _installNvim_() {
 	if [ ! -x "$(command -v nvim)" ]; then
    	    echo "${red}Neovim not Installed${reset}"
         echo "${yellow}Installing Neovim binary..."
-
-        # printf "Choose between : \n"
-        # select VERSION in "Stable" "Nightly"; do
-        #     if [ $VERSION ]; then
-        #         break
-        #     fi
-        # done
-		
 		read -p "Which version of Neovim do you want to install... stable/nightly? (s/n) " version
-
-		# Check if the user entered a valid version
-		if [[ "$version" == "s" ]]; then
-		nvim_version="$stable_version"
-		elif [[ "$version" == "n" ]]; then
-		nvim_version="$nightly_version"
-		else
-		echo "Invalid version specified. Please enter either 's' or 'n'."
-		exit 1
-		fi
-
-		printf "\nInstalling %s version...\n" "$version"
-
-        _makeTempDir_ "neovim"
-        cd ${tmpDir} || exit
-
 		if [[ $version == "s" ]]; then
 			curl -sLO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
 			sudo chmod u+x nvim.appimage
