@@ -254,7 +254,7 @@ _installNvim_() {
    	    echo "${red}Neovim not Installed${reset}"
         echo "${yellow}Installing Neovim binary..."
 
-        echo "Choose between : "
+        printf "Choose between : \n"
         select VERSION in "Stable" "Nightly"; do
             if [ $VERSION ]; then
                 break
