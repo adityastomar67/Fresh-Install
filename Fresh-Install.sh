@@ -191,19 +191,14 @@ EOF
 
 _header_() {
     clear
-    # printf "%${COLUMNS}s\n" "███████╗██████╗ ███████╗ ██████╗██╗  ██╗      ██╗███╗  ██╗ ██████╗████████╗ █████╗ ██╗     ██╗         ██████╗██╗  ██╗"
-    # printf "%${COLUMNS}s\n" "██╔════╝██╔══██╗██╔════╝██╔════╝██║  ██║      ██║████╗ ██║██╔════╝╚══██╔══╝██╔══██╗██║     ██║        ██╔════╝██║  ██║"
-    # printf "%${COLUMNS}s\n" "█████╗  ██████╔╝█████╗  ╚█████╗ ███████║█████╗██║██╔██╗██║╚█████╗    ██║   ███████║██║     ██║        ╚█████╗ ███████║"
-    # printf "%${COLUMNS}s\n" "██╔══╝  ██╔══██╗██╔══╝   ╚═══██╗██╔══██║╚════╝██║██║╚████║ ╚═══██╗   ██║   ██╔══██║██║     ██║         ╚═══██╗██╔══██║"
-    # printf "%${COLUMNS}s\n" "██║     ██║  ██║███████╗██████╔╝██║  ██║      ██║██║ ╚███║██████╔╝   ██║   ██║  ██║███████╗███████╗██╗██████╔╝██║  ██║"
-    # printf "%${COLUMNS}s\n" "╚═╝     ╚═╝  ╚═╝╚══════╝╚═════╝ ╚═╝  ╚═╝      ╚═╝╚═╝  ╚══╝╚═════╝    ╚═╝   ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝╚═════╝ ╚═╝  ╚═╝"
-    # printf "%${COLUMNS}s\n" "                                                 █▄▄ █▄█   ▄▄   ▄▀█ █▀▄ █ ▀█▀ █▄█ ▄▀█ █▀ ▀█▀ █▀█ █▀▄▀█ ▄▀█ █▀█ █▄▄ ▀▀█"
-    # printf "%${COLUMNS}s\n" "                                                 █▄█  █         █▀█ █▄▀ █  █   █  █▀█ ▄█  █  █▄█ █ ▀ █ █▀█ █▀▄ █▄█   █"
-
-
-printf "%${COLUMNS}s\n" "█▀▀▀ █▀▀█ █▀▀ █▀▀ █ █   ▀█▀ █▀▀▄ █▀▀ ▀▀█▀▀ █▀▀█ █  █"
-printf "%${COLUMNS}s\n" "█▀▀▀ █▄▄▀ █▀▀ ▀▀█ █▀▀█ ▀▀  █  █ █ ▀▀█  █  █▄▄█ █  █"  
-printf "%${COLUMNS}s\n" "█  ▀ ▀▀ ▀▀▀ ▀▀▀ ▀ ▀   ▄█▄ ▀ ▀ ▀▀▀  ▀  ▀ ▀ ▀▀▀ ▀▀▀"
+    printf "%${COLUMNS}s\n" "███████╗██████╗ ███████╗ ██████╗██╗  ██╗      ██╗███╗  ██╗ ██████╗████████╗ █████╗ ██╗     ██╗         ██████╗██╗  ██╗"
+    printf "%${COLUMNS}s\n" "██╔════╝██╔══██╗██╔════╝██╔════╝██║  ██║      ██║████╗ ██║██╔════╝╚══██╔══╝██╔══██╗██║     ██║        ██╔════╝██║  ██║"
+    printf "%${COLUMNS}s\n" "█████╗  ██████╔╝█████╗  ╚█████╗ ███████║█████╗██║██╔██╗██║╚█████╗    ██║   ███████║██║     ██║        ╚█████╗ ███████║"
+    printf "%${COLUMNS}s\n" "██╔══╝  ██╔══██╗██╔══╝   ╚═══██╗██╔══██║╚════╝██║██║╚████║ ╚═══██╗   ██║   ██╔══██║██║     ██║         ╚═══██╗██╔══██║"
+    printf "%${COLUMNS}s\n" "██║     ██║  ██║███████╗██████╔╝██║  ██║      ██║██║ ╚███║██████╔╝   ██║   ██║  ██║███████╗███████╗██╗██████╔╝██║  ██║"
+    printf "%${COLUMNS}s\n" "╚═╝     ╚═╝  ╚═╝╚══════╝╚═════╝ ╚═╝  ╚═╝      ╚═╝╚═╝  ╚══╝╚═════╝    ╚═╝   ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝╚═════╝ ╚═╝  ╚═╝"
+    printf "%${COLUMNS}s\n" "                                                 █▄▄ █▄█   ▄▄   ▄▀█ █▀▄ █ ▀█▀ █▄█ ▄▀█ █▀ ▀█▀ █▀█ █▀▄▀█ ▄▀█ █▀█ █▄▄ ▀▀█"
+    printf "%${COLUMNS}s\n" "                                                 █▄█  █         █▀█ █▄▀ █  █   █  █▀█ ▄█  █  █▄█ █ ▀ █ █▀█ █▀▄ █▄█   █"
 }
 
 ##--> Configurations <--##
@@ -270,7 +265,7 @@ _installNvim_() {
         _makeTempDir_ "neovim"
         cd ${tmpDir} || exit
 
-		if [[ "$NVIM_VERSION" == "Stable" ]]; then
+		if [[ $NVIM_VERSION = "Stable" ]]; then
 			curl -sLO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
 			sudo chmod u+x nvim.appimage
 			./nvim.appimage --appimage-extract
@@ -288,6 +283,7 @@ _installNvim_() {
 	fi
 
     ## Back up current config
+	[ -d "$NVIM_DIR.backup" ] && rm -rf "$NVIM_DIR.backup"
     [ -d $NVIM_DIR ] && mv $NVIM_DIR "$NVIM_DIR.backup"
 
     ## Optional but recommended
@@ -295,7 +291,7 @@ _installNvim_() {
     [ -d "$HOME/.local/state/nvim" ] && mv "$HOME/.local/state/nvim" "$HOME/.local/state/nvim.backup"
     [ -d "$HOME/.cache/nvim" ]       && mv "$HOME/.cache/nvim"       "$HOME/.cache/nvim.backup"
 
-    _clone_ "$GITHUB_URL/LazyNV.git" $NVIM_DIR
+    _clone_ "$GITHUB_URL/NvStar.git" $NVIM_DIR
 
     # Remove git related files
     rm -rf "$NVIM_DIR/.git"
