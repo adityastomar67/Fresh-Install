@@ -261,7 +261,7 @@ _installNvim_() {
         #     fi
         # done
 
-		echo "Choose between : "
+		echo "Choose between two : "
     	select drive in "Stable" "Nightly"
     	do
 			if [ $drive ]; then
