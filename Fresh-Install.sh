@@ -68,14 +68,14 @@ _mainScript_() {
 	echo "${green}Everything you asked is done. Enjoy your new setup!${reset}"
 }
 
-# set -o errexit
-# set -o nounset
-# set -o pipefail
+set -o errexit
+set -o nounset
+set -o pipefail
 
 ##--> Variables & Flags <--##
 ### Variables
 SCRIPT_NAME="fresh-install"
-# SCRIPT_DIR=$(cd "$(dirname "$BASH_SOURCE[0]")" &>/dev/null && pwd -P)
+SCRIPT_DIR=$(cd "$(dirname "$BASH_SOURCE[0]")" &>/dev/null && pwd -P)
 NVIM_DIR="$HOME/.config/nvim"
 GITHUB_URL="https://www.github.com/adityastomar67"
 DOTS_URL="$GITHUB_URL/.dotfiles.git"
@@ -260,22 +260,31 @@ _installNvim_() {
         #         break
         #     fi
         # done
-		
-		PS3="Choose between :"
 
-		select version in Stable Nightly
+		PS3='Please enter your choice: '
+		options=("Stable" "Nightly" "Quit")
+		select VERSION in "${options[@]}"
 		do
-			echo "Selected character: $character"
-			echo "Selected number: $REPLY"
+			case $VERSION in
+				"Stable")
+					echo "you chose choice 1"
+					;;
+				"Nightly")
+					echo "you chose choice 2"
+					;;
+				"Quit")
+					break
+					;;
+				*) echo "invalid option $REPLY";;
+			esac
 		done
-
-
-		printf "\nInstalling %s version...\n" "$version"
+		
+		printf "\nInstalling %s version...\n" "$VERSION"
 
         _makeTempDir_ "neovim"
         cd ${tmpDir} || exit
 
-		if [[ $version = "Stable" ]]; then
+		if [[ $VERSION = "Stable" ]]; then
 			curl -sLO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
 			sudo chmod u+x nvim.appimage
 			./nvim.appimage --appimage-extract
