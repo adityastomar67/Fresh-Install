@@ -278,7 +278,7 @@ _installNvim_() {
         _makeTempDir_ "neovim"
         cd ${tmpDir} || exit
 
-		if [[ $version == "Stable" ]]; then
+		if [[ $version == "s" ]]; then
 			curl -sLO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
 			sudo chmod u+x nvim.appimage
 			./nvim.appimage --appimage-extract
