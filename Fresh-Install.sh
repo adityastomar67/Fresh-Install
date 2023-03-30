@@ -260,33 +260,25 @@ _installNvim_() {
         #         break
         #     fi
         # done
-
-		local VERSION=""
-
-		PS3='Please enter your choice: '
-		options=("Stable" "Nightly" "Quit")
-		select VERSION in "${options[@]}"
-		do
-			case $VERSION in
-				"Stable")
-					echo "you chose choice 1"
-					;;
-				"Nightly")
-					echo "you chose choice 2"
-					;;
-				"Quit")
-					break
-					;;
-				*) echo "invalid option $REPLY";;
-			esac
-		done
 		
-		# printf "\nInstalling %s version...\n" "$VERSION"
+		read -p "Which version of Neovim do you want to install... stable/nightly? (s/n) " version
+
+		# Check if the user entered a valid version
+		if [[ "$version" == "s" ]]; then
+		nvim_version="$stable_version"
+		elif [[ "$version" == "n" ]]; then
+		nvim_version="$nightly_version"
+		else
+		echo "Invalid version specified. Please enter either 's' or 'n'."
+		exit 1
+		fi
+
+		printf "\nInstalling %s version...\n" "$version"
 
         _makeTempDir_ "neovim"
         cd ${tmpDir} || exit
 
-		if [[ $VERSION = "Stable" ]]; then
+		if [[ $version == "Stable" ]]; then
 			curl -sLO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
 			sudo chmod u+x nvim.appimage
 			./nvim.appimage --appimage-extract
