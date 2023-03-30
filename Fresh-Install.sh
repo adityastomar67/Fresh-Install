@@ -68,9 +68,9 @@ _mainScript_() {
 	echo "${green}Everything you asked is done. Enjoy your new setup!${reset}"
 }
 
-set -o errexit
-set -o nounset
-set -o pipefail
+# set -o errexit
+# set -o nounset
+# set -o pipefail
 
 ##--> Variables & Flags <--##
 ### Variables
