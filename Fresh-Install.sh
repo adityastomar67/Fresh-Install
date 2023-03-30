@@ -281,7 +281,7 @@ _installNvim_() {
 			esac
 		done
 		
-		printf "\nInstalling %s version...\n" "$VERSION"
+		# printf "\nInstalling %s version...\n" "$VERSION"
 
         _makeTempDir_ "neovim"
         cd ${tmpDir} || exit
