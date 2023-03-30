@@ -248,6 +248,7 @@ _installGrub_() {
 }
 
 _installNvim_() {
+	local version=""
 	## Checking if Neovim is Installed
 	if [ ! -x "$(command -v nvim)" ]; then
    	    echo "${red}Neovim not Installed${reset}"
