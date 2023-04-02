@@ -1,8 +1,8 @@
 #!/bin/bash
 
 echo "Which version of Neovim would you like to install?"
-echo "Enter 's' for stable or 'n' for nightly:"
-read VERSION
+echo
+read -p "Enter 's' for stable or 'n' for nightly:" VERSION
 
 if [[ "$VERSION" == "s" ]]; then
   echo "Installing stable version of Neovim..."
