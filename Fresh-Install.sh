@@ -22,8 +22,8 @@
 
 ##--> Main Entry Point of the script <--##
 _mainScript_() {
-	_header_
-    _makeTempDir_ $SCRIPT_NAME
+	# _header_
+    # _makeTempDir_ $SCRIPT_NAME
 
 	if [ $# -gt 0 ]; then
 		case "$1" in
@@ -31,7 +31,7 @@ _mainScript_() {
 			_installArch_
 			;;
 		-v | --nvim)
-			_installNvim_
+			curl -sL https://raw.githubusercontent.com/adityastomar67/Fresh-Install/master/nvim.sh | sh -s --
 			;;
 		--LazyNV)
 			_installLazyNV_
@@ -294,7 +294,7 @@ _installNvim_() {
 
     # # Remove git related files
     # rm -rf "$NVIM_DIR/.git"
-	curl -sL https://raw.githubusercontent.com/adityastomar67/Fresh-Install/master/nvim.sh | sh -s --
+	
 }
 
 _installLazyNV_() {
