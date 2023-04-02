@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export NVIM_DIR="$HOME/.config/nvim"
+
 # Checking if Neovim is Installed
 if [ ! -x "$(command -v nvim)" ]; then
   echo "${red}Neovim not Installed${reset}"
@@ -9,8 +11,13 @@ if [ ! -x "$(command -v nvim)" ]; then
   echo
   read -p "Enter 's' for stable or 'n' for nightly:" VERSION
 
-  printf "\nInstalling %s version...\n" "$VERSION"
+  if [[ "$VERSION" == "s" ]]; then
+    printf "\nInstalling Stable version...\n"
+  elif [[ "$VERSION" == "n" ]]; then
+    printf "\nInstalling Nightly version...\n"
+  fi
 
+  [ -d "$HOME/neovim" ] && rm -rf "$HOME/neovim"
   mkdir "$HOME/neovim"
   cd "$HOME/neovim" || exit
 
@@ -27,20 +34,30 @@ if [ ! -x "$(command -v nvim)" ]; then
     make CMAKE_BUILD_TYPE=RelWithDebInfo
     sudo make install
   fi
-else
-  echo "${green}Neovim is installed. Installing configs...${reset}"
 fi
+echo "${green}Neovim is installed. Installing configs...${reset}"
 
 ## Back up current config
+echo "Backin up current config..." && sleep 2
+[ -d "$NVIM_DIR.backup" ] && rm -rf "$NVIM_DIR.backup"
 [ -d $NVIM_DIR ] && mv $NVIM_DIR "$NVIM_DIR.backup"
 
 ## Optional but recommended
-[ -d "$HOME/.local/share/nvim" ] && rm -rf "$HOME/.local/share/nvim" "$HOME/.local/share/nvim.backup"
-[ -d "$HOME/.local/state/nvim" ] && rm -rf "$HOME/.local/state/nvim" "$HOME/.local/state/nvim.backup"
-[ -d "$HOME/.cache/nvim" ] && rm -rf "$HOME/.cache/nvim" "$HOME/.cache/nvim.backup"
+echo "Removing old cache..." && sleep 2
+[ -d "$HOME/.local/share/nvim" ] && rm -rf "$HOME/.local/share/nvim"
+[ -d "$HOME/.local/state/nvim" ] && rm -rf "$HOME/.local/state/nvim"
+[ -d "$HOME/.cache/nvim" ] && rm -rf "$HOME/.cache/nvim"
 
-git clone "$GITHUB_URL/NvStar.git" $NVIM_DIR
+echo "Which config of Neovim would you like to install?"
+echo
+read -p "Enter 'l' for LazyNV or 'n' for NvStar: " CONF
+
+if [[ "$CONF" == "l" ]]; then
+  git clone "$GITHUB_URL/LazyNV.git" $NVIM_DIR
+elif [[ "$CONF" == "n" ]]; then
+  git clone "$GITHUB_URL/NvStar.git" $NVIM_DIR
+fi
 
 # Remove git related files
-rm -rf "$NVIM_DIR/.git"
+# rm -rf "$NVIM_DIR/.git"
 rm -rf "$HOME/neovim"

@@ -33,9 +33,6 @@ _mainScript_() {
 		-v | --nvim)
 			curl -sLO https://raw.githubusercontent.com/adityastomar67/Fresh-Install/master/nvim.sh && ./nvim.sh
 			;;
-		--LazyNV)
-			_installLazyNV_
-			;;
 		-d | --dots)
 			_installDots_
 			;;
@@ -71,7 +68,6 @@ _mainScript_() {
 ##--> Variables & Flags <--##
 ### Variables
 SCRIPT_NAME="fresh-install"
-export NVIM_DIR="$HOME/.config/nvim"
 export GITHUB_URL="https://www.github.com/adityastomar67"
 DOTS_URL="$GITHUB_URL/.dotfiles.git"
 PACKAGE_MANAGER=""
