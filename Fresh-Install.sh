@@ -31,7 +31,7 @@ _mainScript_() {
 			_installArch_
 			;;
 		-v | --nvim)
-			curl -sL https://raw.githubusercontent.com/adityastomar67/Fresh-Install/master/nvim.sh | sh -s --
+			curl -sLO https://raw.githubusercontent.com/adityastomar67/Fresh-Install/master/nvim.sh && ./nvim.sh
 			;;
 		--LazyNV)
 			_installLazyNV_
@@ -71,9 +71,8 @@ _mainScript_() {
 ##--> Variables & Flags <--##
 ### Variables
 SCRIPT_NAME="fresh-install"
-SCRIPT_DIR=$(cd "$(dirname "$BASH_SOURCE[0]")" &>/dev/null && pwd -P)
-NVIM_DIR="$HOME/.config/nvim"
-GITHUB_URL="https://www.github.com/adityastomar67"
+export NVIM_DIR="$HOME/.config/nvim"
+export GITHUB_URL="https://www.github.com/adityastomar67"
 DOTS_URL="$GITHUB_URL/.dotfiles.git"
 PACKAGE_MANAGER=""
 
@@ -105,27 +104,27 @@ fi
 
 ### Colors
 if tput setaf 1 &>/dev/null; then
-	bold=$(tput bold)
-	white=$(tput setaf 7)
-	reset=$(tput sgr0)
-	purple=$(tput setaf 171)
-	red=$(tput setaf 1)
-	green=$(tput setaf 76)
-	tan=$(tput setaf 3)
-	yellow=$(tput setaf 3)
-	blue=$(tput setaf 38)
-	underline=$(tput sgr 0 1)
+	export bold=$(tput bold)
+	export white=$(tput setaf 7)
+	export reset=$(tput sgr0)
+	export purple=$(tput setaf 171)
+	export red=$(tput setaf 1)
+	export green=$(tput setaf 76)
+	export tan=$(tput setaf 3)
+	export yellow=$(tput setaf 3)
+	export blue=$(tput setaf 38)
+	export underline=$(tput sgr 0 1)
 else
-	bold="\033[4;37m"
-	white="\033[0;37m"
-	reset="\033[0m"
-	purple="\033[0;35m"
-	red="\033[0;31m"
-	green="\033[1;32m"
-	tan="\033[0;33m"
-	yellow="\033[0;33m"
-	blue="\033[0;34m"
-	underline="\033[4;37m"
+	export bold="\033[4;37m"
+	export white="\033[0;37m"
+	export reset="\033[0m"
+	export purple="\033[0;35m"
+	export red="\033[0;31m"
+	export green="\033[1;32m"
+	export tan="\033[0;33m"
+	export yellow="\033[0;33m"
+	export blue="\033[0;34m"
+	export underline="\033[4;37m"
 fi
 
 ##--> Functionalities <--##
