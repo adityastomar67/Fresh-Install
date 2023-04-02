@@ -33,6 +33,9 @@ _mainScript_() {
 		-v | --nvim)
 			curl -sLO https://raw.githubusercontent.com/adityastomar67/Fresh-Install/master/nvim.sh && ./nvim.sh
 			;;
+		--LazyNV)
+			_installLazyNV_
+			;;
 		-d | --dots)
 			_installDots_
 			;;
@@ -258,9 +261,6 @@ _installLazyNV_() {
 	# Create config directory
 	mkdir -p $NEOVIM_DIR
 	git clone https://github.com/adityastomar67/LazyNV.git $NEOVIM_DIR
-
-	# Remove git related files
-	rm -rf ~/.config/nvim/.git
 
 	## Run Neovim for the initial setup
 	cd $HOME && nvim
