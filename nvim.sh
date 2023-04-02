@@ -1,28 +1,27 @@
 #!/bin/bash
 
+# Checking if Neovim is Installed
 if [ ! -x "$(command -v nvim)" ]; then
   echo "${red}Neovim not Installed${reset}"
   echo "${yellow}Installing Neovim binary..."
 
-  echo "Choose between : "
-  select NVIM_VERSION in "Stable" "Nightly"; do
-    if [ $NVIM_VERSION ]; then
-      break
-    fi
-  done
-  printf "\nInstalling %s version...\n" "$NVIM_VERSION"
+  echo "Which version of Neovim would you like to install?"
+  echo
+  read -p "Enter 's' for stable or 'n' for nightly:" VERSION
+
+  printf "\nInstalling %s version...\n" "$VERSION"
 
   mkdir "$HOME/neovim"
   cd "$HOME/neovim" || exit
 
-  if [[ "$NVIM_VERSION" == "Stable" ]]; then
+  if [[ "$VERSION" == "s" ]]; then
     curl -sLO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
     sudo chmod u+x nvim.appimage
     ./nvim.appimage --appimage-extract
     ./squashfs-root/AppRun --version
     sudo mv squashfs-root /
     sudo mv /squashfs-root/AppRun /usr/bin/nvim
-  else
+  elif [[ "$VERSION" == "n" ]]; then
     git clone --quiet --depth 1 --branch nightly https://github.com/neovim/neovim.git
     cd neovim || exit
     make CMAKE_BUILD_TYPE=RelWithDebInfo
