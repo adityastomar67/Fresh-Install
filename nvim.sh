@@ -11,15 +11,15 @@ if [ ! -x "$(command -v nvim)" ]; then
   echo
   read -p "Enter 's' for stable or 'n' for nightly:" VERSION
 
+  [ -d "$HOME/neovim" ] && rm -rf "$HOME/neovim"
+  mkdir "$HOME/neovim"
+  cd "$HOME/neovim" || exit
+
   if [[ "$VERSION" == "s" ]]; then
     printf "\nInstalling Stable version...\n"
   elif [[ "$VERSION" == "n" ]]; then
     printf "\nInstalling Nightly version...\n"
   fi
-
-  [ -d "$HOME/neovim" ] && rm -rf "$HOME/neovim"
-  mkdir "$HOME/neovim"
-  cd "$HOME/neovim" || exit
 
   if [[ "$VERSION" == "s" ]]; then
     curl -sLO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
