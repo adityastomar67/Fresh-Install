@@ -40,7 +40,7 @@ fi
 [ -d "$HOME/.local/state/nvim" ] && rm -rf "$HOME/.local/state/nvim" "$HOME/.local/state/nvim.backup"
 [ -d "$HOME/.cache/nvim" ] && rm -rf "$HOME/.cache/nvim" "$HOME/.cache/nvim.backup"
 
-_clone_ "$GITHUB_URL/NvStar.git" $NVIM_DIR
+git clone "$GITHUB_URL/NvStar.git" $NVIM_DIR
 
 # Remove git related files
 rm -rf "$NVIM_DIR/.git"
