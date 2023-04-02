@@ -23,7 +23,7 @@
 ##--> Main Entry Point of the script <--##
 _mainScript_() {
 	_header_
-    # _makeTempDir_ $SCRIPT_NAME
+    _makeTempDir_ $SCRIPT_NAME
 
 	if [ $# -gt 0 ]; then
 		case "$1" in
@@ -75,6 +75,7 @@ set -o pipefail
 ##--> Variables & Flags <--##
 ### Variables
 SCRIPT_NAME="fresh-install"
+SCRIPT_DIR=$(cd "$(dirname "$BASH_SOURCE[0]")" &>/dev/null && pwd -P)
 NVIM_DIR="$HOME/.config/nvim"
 GITHUB_URL="https://www.github.com/adityastomar67"
 DOTS_URL="$GITHUB_URL/.dotfiles.git"
@@ -248,13 +249,23 @@ _installGrub_() {
 }
 
 _installNvim_() {
-	local version=""
 	## Checking if Neovim is Installed
 	if [ ! -x "$(command -v nvim)" ]; then
    	    echo "${red}Neovim not Installed${reset}"
         echo "${yellow}Installing Neovim binary..."
-		read -p "Which version of Neovim do you want to install... stable/nightly? (s/n) " version
-		if [[ $version == "s" ]]; then
+
+        echo "Choose between : "
+        select NVIM_VERSION in "Stable" "Nightly"; do
+            if [ $NVIM_VERSION ]; then
+                break
+            fi
+        done
+		printf "\nInstalling %s version...\n" "$NVIM_VERSION"
+
+        _makeTempDir_ "neovim"
+        cd ${tmpDir} || exit
+
+		if [[ "$NVIM_VERSION" == "Stable" ]]; then
 			curl -sLO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
 			sudo chmod u+x nvim.appimage
 			./nvim.appimage --appimage-extract
@@ -272,7 +283,6 @@ _installNvim_() {
 	fi
 
     ## Back up current config
-	[ -d "$NVIM_DIR.backup" ] && rm -rf "$NVIM_DIR.backup"
     [ -d $NVIM_DIR ] && mv $NVIM_DIR "$NVIM_DIR.backup"
 
     ## Optional but recommended
@@ -291,10 +301,12 @@ _installLazyNV_() {
 	export NEOVIM_DIR
 
 	## Back up current config
+	echo "Backin up current config..." && sleep 2
 	[ -d "$NEOVIM_DIR.backup" ] && rm -rf "$NEOVIM_DIR.backup"
 	[ -d $NEOVIM_DIR ] && mv $NEOVIM_DIR "$NEOVIM_DIR.backup"
 
 	## Optional but recommended
+	echo "Removing old cache..." && sleep 2
 	[ -d "$HOME/.local/share/nvim" ] && rm -rf "$HOME/.local/share/nvim"
 	[ -d "$HOME/.local/state/nvim" ] && rm -rf "$HOME/.local/state/nvim"
 	[ -d "$HOME/.cache/nvim" ]       && rm -rf "$HOME/.cache/nvim"
