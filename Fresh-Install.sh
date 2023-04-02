@@ -243,7 +243,7 @@ _installGrub_() {
 	sudo grub-mkconfig -o /boot/grub/grub.cfg
 }
 
-_installNvim_() {
+# _installNvim_() {
 	## Checking if Neovim is Installed
 	# if [ ! -x "$(command -v nvim)" ]; then
    	#     echo "${red}Neovim not Installed${reset}"
@@ -290,7 +290,7 @@ _installNvim_() {
     # # Remove git related files
     # rm -rf "$NVIM_DIR/.git"
 	
-}
+# }
 
 _installLazyNV_() {
 	NEOVIM_DIR=$HOME/.config/nvim
