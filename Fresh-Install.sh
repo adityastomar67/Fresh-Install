@@ -43,7 +43,7 @@ _mainScript_() {
 			_setWallpaper_
 			;;
 		-z | --zsh)
-			_installZsh_
+			bash <(curl -s https://raw.githubusercontent.com/adityastomar67/zsh-conf/master/install.zsh)
 			;;
 		-g | --grub)
 			_installGrub_
@@ -196,29 +196,6 @@ _header_() {
 }
 
 ##--> Configurations <--##
-_installZsh_() {
-	echo "${blue}${bold}Installing ZSH Configs...${reset}"
-
-	[[ $SHELL != *zsh ]] && echo "${yellow}This is meant to be used with ZSH Shell${reset}"
-
-    if ! cat /etc/shells | grep -qE "\/bin\/zsh"; then
-        echo "${red}ZSH Shell not Installed${reset}"
-        echo "${yellow}Installing ZSH Shell..."
-		_pkgInstall_ "zsh"
-        sleep 1
-	fi
-
-    [ -d "$HOME/.config/.zsh" ] && rm -rf "$HOME/.config/.zsh"
-    [ -d "$HOME/.oh-my-zsh" ]   && rm -rf "$HOME/.oh-my-zsh"
-    [ -d "$HOME/.zinit" ]       && rm -rf "$HOME/.zinit"
-    [ -f "$HOME/.zshrc" ]       && rm -rf "$HOME/.zshrc"
-
-    _clone_ "$GITHUB_URL/.dotfiles.git" "$tmpDir/dots"
-    cp -r "$tmpDir/dots/.zsh" "$HOME/.config/.zsh"
-    chsh -s /usr/bin/zsh
-    source "$HOME/.config/.zsh/.zshrc"
-}
-
 _installGrub_() {
 	# local TYPE
     _clone_ "https://github.com/AllJavi/tartarus-grub.git" "/tmp/GRUB/tartarus" && sudo cp -r /tmp/GRUB/tartarus/tartarus /usr/share/grub/themes/
