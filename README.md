@@ -38,7 +38,7 @@ Usage: ./Fresh-Install.sh [Options...] <url>
  -z, --zsh            Install zsh configs
 
 ## Calling directly inside terminal
-curl -sL https://bit.ly/Fresh-Install | sh -s -- <flags>
+curl -sL https://bit.ly/Fresh-Install | bash -s -- <flags>
 ```
 
 ## Dependencies

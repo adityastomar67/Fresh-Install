@@ -1,391 +1,531 @@
 #!/usr/bin/env bash
-#  _____              _          ___           _        _ _       _
-# |  ___| __ ___  ___| |__      |_ _|_ __  ___| |_ __ _| | |  ___| |__       By      - Aditya Singh Tomar
-# | |_ | '__/ _ \/ __| '_ \ _____| || '_ \/ __| __/ _` | | | / __| '_ \      Contact - adityastomar67@gmail.com
-# |  _|| | |  __/\__ \ | | |_____| || | | \__ \ || (_| | | |_\__ \ | | |     github  - @adityastomar67
-# |_|  |_|  \___||___/_| |_|    |___|_| |_|___/\__\__,_|_|_(_)___/_| |_|
-# Made for Arch Linux
+# ==============================================================================
+#  SCRIPT: fresh-install.sh
+#  AUTHOR: Aditya Singh Tomar (@adityastomar67)
+#  DESC:   Cross-platform environment bootstrapper (Arch Linux, macOS, Debian).
+#          Handles Dotfiles, Neovim, Wallpapers, and System Dependencies.
+#  LICENSE: MIT
+# ==============================================================================
 
-##--> Usage <--##
-	# Usage: ./Fresh-Install.sh [Options...] <url>
-	#  -a, --arch           Install Arch Linux using Arch-I.
-	#  -d, --dots           Install various config files
-	#  -g, --grub           Install GRUB Theme
-	#  -n, --nvim           Install only configs Related to Neovim
-	#  -r, --deps           Install all the dependencies
-	#  -s, --st             Install only configs Related to st
-	#  -w, --wall           Install Wallpapers
-	#  -z, --zsh            Install zsh configs
+# --> STRICT MODE <--
+# -e: Exit immediately if a command exits with a non-zero status.
+# -u: Treat unset variables as an error.
+# -o pipefail: Pipeline returns status of the last command to exit with error.
+set -euo pipefail
 
-	### Calling directly inside terminal
-	# curl -sL https://bit.ly/Fresh-Install | sh -s -- <flags>
+# ==============================================================================
+# [MODULE] CONFIGURATION & CONSTANTS
+# Read-only configuration variables used throughout the script.
+# ==============================================================================
+declare -r SCRIPT_NAME="fresh-install"
+declare -r GITHUB_URL="https://www.github.com/adityastomar67"
 
-##--> Main Entry Point of the script <--##
-_mainScript_() {
-	# _header_
-    # _makeTempDir_ $SCRIPT_NAME
+# --- [UPDATE] Defined separate repos for Linux and macOS ---
+declare -r DOTS_URL_LINUX="$GITHUB_URL/.dotfiles.git"
+# REPLACE THIS with your actual macOS dotfiles repo URL
+declare -r DOTS_URL_MAC="$GITHUB_URL/.dotfiles-mac.git"
 
-	if [ $# -gt 0 ]; then
-		case "$1" in
-		-a | --arch)
-			_installArch_
-			;;
-		-v | --nvim)
-			curl -sLO https://raw.githubusercontent.com/adityastomar67/Fresh-Install/master/nvim.sh && ./nvim.sh
-			;;
-		--LazyNV)
-			_installLazyNV_
-			;;
-		-d | --dots)
-			_installDots_
-			;;
-		-w | --wall)
-			_setWallpaper_
-			;;
-		-z | --zsh)
-			bash <(curl -s https://raw.githubusercontent.com/adityastomar67/zsh-conf/master/install.zsh)
-			;;
-		-g | --grub)
-			_installGrub_
-			;;
-		-r | --deps)
-		    _installDeps_
-			;;
-		-h | --help)
-			_usage_
-			;;
-		?)
-			echo "script usage: $(basename \$0) [-l] [-h] [-a somevalue]" >&2
-			exit 1
-			;;
-		esac
-	else
-		echo "No args"
-	fi
+declare -r BACKUP_DIR="$HOME/.config/backup_$(date +%s)"
 
-	[[ -d $SCRIPT_NAME ]] && rm -rf $SCRIPT_NAME
+# Global State Variables (Mutable)
+# g_os_type: Stores 'Darwin' (macOS) or 'Linux'
+declare g_os_type=""
+# g_install_cmd: Stores the exact command string to install packages (e.g., 'brew install')
+declare g_install_cmd=""
 
-	echo "${green}Everything you asked is done. Enjoy your new setup!${reset}"
+
+# ==============================================================================
+# [MODULE] LOGGER
+# Handles text formatting, colors, and user output.
+# ==============================================================================
+Logger::init() {
+    # Check if terminal supports colors (tput)
+    if tput setaf 1 &>/dev/null; then
+        readonly BOLD=$(tput bold)
+        readonly RESET=$(tput sgr0)
+        readonly RED=$(tput setaf 1)
+        readonly GREEN=$(tput setaf 76)
+        readonly BLUE=$(tput setaf 38)
+        readonly YELLOW=$(tput setaf 3)
+    else
+        readonly BOLD="" RESET="" RED="" GREEN="" BLUE="" YELLOW=""
+    fi
 }
 
-##--> Variables & Flags <--##
-### Variables
-SCRIPT_NAME="fresh-install"
-export GITHUB_URL="https://www.github.com/adityastomar67"
-DOTS_URL="$GITHUB_URL/.dotfiles.git"
-PACKAGE_MANAGER=""
+# @desc Print info message (Blue)
+Logger::info() { echo -e "${BLUE}[INFO]${RESET} $1"; }
 
-if [[ $(uname) == "Linux" ]]; then
-	PACKAGE_MANAGER=""
-	if [ -x "$(command -v pacman)" ]; then
-		PACKAGE_MANAGER="sudo pacman -Sy "
-	elif [ -x "$(command -v apt-get)" ]; then
-		PACKAGE_MANAGER="sudo apt-get install "
-	elif [ -x "$(command -v dnf)" ]; then
-		PACKAGE_MANAGER="sudo dnf install "
-	elif [ -x "$(command -v zypper)" ]; then
-		PACKAGE_MANAGER="sudo zypper install -n "
-	elif [ -x "$(command -v emerge)" ]; then
-		PACKAGE_MANAGER="emerge "
-	fi
-elif [[ $(uname) == "Darwin" ]]; then
-	LIST_OF_APPS=($(ls "/bin")+$(ls "/usr/bin"))
-	IFS="|"
-	if [[ "${IFS}"${LIST_OF_APPS[*]}"${IFS}" =~ "${IFS}brew${IFS}" ]]; then
-		echo "brew is not installed"
-		echo "Installing brew"
-		/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-	else
-		echo "brew, is installed. Checking next dependency.."
-	fi
-	PACKAGE_MANAGER="brew install "
-fi
+# @desc Print success message (Green)
+Logger::success() { echo -e "${GREEN}[SUCCESS]${RESET} $1"; }
 
-### Colors
-if tput setaf 1 &>/dev/null; then
-	export bold=$(tput bold)
-	export white=$(tput setaf 7)
-	export reset=$(tput sgr0)
-	export purple=$(tput setaf 171)
-	export red=$(tput setaf 1)
-	export green=$(tput setaf 76)
-	export tan=$(tput setaf 3)
-	export yellow=$(tput setaf 3)
-	export blue=$(tput setaf 38)
-	export underline=$(tput sgr 0 1)
-else
-	export bold="\033[4;37m"
-	export white="\033[0;37m"
-	export reset="\033[0m"
-	export purple="\033[0;35m"
-	export red="\033[0;31m"
-	export green="\033[1;32m"
-	export tan="\033[0;33m"
-	export yellow="\033[0;33m"
-	export blue="\033[0;34m"
-	export underline="\033[4;37m"
-fi
+# @desc Print warning message (Yellow)
+Logger::warn() { echo -e "${YELLOW}[WARN]${RESET} $1"; }
 
-##--> Functionalities <--##
-_makeTempDir_() {
-	[ -d "${tmpDir:-$1}" ] && return 0
+# @desc Print error message (Red) and output to stderr
+Logger::error() { echo -e "${RED}[ERROR]${RESET} $1" >&2; }
 
-	if [ -n "${1-}" ]; then
-		tmpDir="${TMPDIR:-/tmp/}${1}"
-	else
-		tmpDir="${TMPDIR:-/tmp/}$(basename "$0")"
-	fi
-	(umask 077 && mkdir -p "${tmpDir}") || {
-		echo "${red}Could not create temporary directory! Exiting.${reset}"
-	}
-}
-
-_clone_() {
-	if [ $# -gt 1 ]; then
-		if [ -d "$2" ]; then
-			# TODO: Create error command
-			# error "Directory $2 already exists"
-			return
-		fi
-		git clone --quiet "$1" "$2"
-	else
-		git clone --quiet "$1"
-	fi
-}
-
-_pkgInstall_() {
-	LIST_OF_APPS=($(ls "/bin")+$(ls "/usr/bin"))
-	IFS="|"
-	if [[ "${IFS}"${LIST_OF_APPS[*]}"${IFS}" =~ "${IFS}$2${IFS}" ]]; then
-		echo "$1, is installed. Checking next dependency..."
-	else
-		echo "$1 is not installed."
-		$PACKAGE_MANAGER $1
-	fi
-}
-
-_usage_() {
-	cat <<EOF
-  Usage: ./${bold}$(basename "$0") [OPTION]... <url>${reset}
-  This is a environment setup script that eases up the configuration part of the new OS installation.
-
-  ${bold}Options:${reset}
-    -a, --arch           Install Arch Linux using Arch-I.
-    -d, --dots           Install various config files.
-    -g, --grub           Install GRUB Theme.
-	-h, --help           Show Usage/help.
-    -n, --nvim           Install only configs Related to Neovim.
-	-r, --deps           Install all the dependencies
-	-s, --st             Install only configs Related to st
-    -m, --menu           Show other options.
-    -w, --wall           Install Wallpapers.
-
+# @desc Display the ASCII art header
+Logger::header() {
+    clear
+    cat <<EOF
+${BLUE}
+███████╗██████╗ ███████╗ ██████╗██╗  ██╗      ██╗███╗  ██╗ ██████╗████████╗ █████╗ ██╗     ██╗
+██╔════╝██╔══██╗██╔════╝██╔════╝██║  ██║      ██║████╗ ██║██╔════╝╚══██╔══╝██╔══██╗██║     ██║
+█████╗  ██████╔╝█████╗  ╚█████╗ ███████║█████╗██║██╔██╗██║╚█████╗    ██║   ███████║██║     ██║
+██╔══╝  ██╔══██╗██╔══╝   ╚═══██╗██╔══██║╚════╝██║██║╚████║ ╚═══██╗   ██║   ██╔══██║██║     ██║
+██║     ██║  ██║███████╗██████╔╝██║  ██║      ██║██║ ╚███║██████╔╝   ██║   ██║  ██║███████╗███████╗
+╚═╝     ╚═╝  ╚═╝╚══════╝╚═════╝ ╚═╝  ╚═╝      ╚═╝╚═╝  ╚══╝╚═════╝    ╚═╝   ╚═╝  ╚═╝╚══════╝╚══════╝
+${RESET}
 EOF
 }
 
-_header_() {
-    clear
-    printf "%${COLUMNS}s\n" "███████╗██████╗ ███████╗ ██████╗██╗  ██╗      ██╗███╗  ██╗ ██████╗████████╗ █████╗ ██╗     ██╗         ██████╗██╗  ██╗"
-    printf "%${COLUMNS}s\n" "██╔════╝██╔══██╗██╔════╝██╔════╝██║  ██║      ██║████╗ ██║██╔════╝╚══██╔══╝██╔══██╗██║     ██║        ██╔════╝██║  ██║"
-    printf "%${COLUMNS}s\n" "█████╗  ██████╔╝█████╗  ╚█████╗ ███████║█████╗██║██╔██╗██║╚█████╗    ██║   ███████║██║     ██║        ╚█████╗ ███████║"
-    printf "%${COLUMNS}s\n" "██╔══╝  ██╔══██╗██╔══╝   ╚═══██╗██╔══██║╚════╝██║██║╚████║ ╚═══██╗   ██║   ██╔══██║██║     ██║         ╚═══██╗██╔══██║"
-    printf "%${COLUMNS}s\n" "██║     ██║  ██║███████╗██████╔╝██║  ██║      ██║██║ ╚███║██████╔╝   ██║   ██║  ██║███████╗███████╗██╗██████╔╝██║  ██║"
-    printf "%${COLUMNS}s\n" "╚═╝     ╚═╝  ╚═╝╚══════╝╚═════╝ ╚═╝  ╚═╝      ╚═╝╚═╝  ╚══╝╚═════╝    ╚═╝   ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝╚═════╝ ╚═╝  ╚═╝"
-    printf "%${COLUMNS}s\n" "                                                 █▄▄ █▄█   ▄▄   ▄▀█ █▀▄ █ ▀█▀ █▄█ ▄▀█ █▀ ▀█▀ █▀█ █▀▄▀█ ▄▀█ █▀█ █▄▄ ▀▀█"
-    printf "%${COLUMNS}s\n" "                                                 █▄█  █         █▀█ █▄▀ █  █   █  █▀█ ▄█  █  █▄█ █ ▀ █ █▀█ █▀▄ █▄█   █"
+
+# ==============================================================================
+# [MODULE] SYSTEM
+# Handles Operating System detection and abstraction of Package Managers.
+# ==============================================================================
+
+# @desc Detects the OS and sets global variable g_os_type
+System::detect_os() {
+    g_os_type=$(uname -s)
+    Logger::info "Detected Operating System: $g_os_type"
 }
 
-##--> Configurations <--##
-_installGrub_() {
-	# local TYPE
-    _clone_ "https://github.com/AllJavi/tartarus-grub.git" "/tmp/GRUB/tartarus" && sudo cp -r /tmp/GRUB/tartarus/tartarus /usr/share/grub/themes/
-	_clone_ "https://github.com/catppuccin/grub.git" "/tmp/GRUB/catppuccin"     && sudo cp -r /tmp/GRUB/catppuccin/src/* /usr/share/grub/themes/
-
-	echo "Which GRUB Theme you want?: "
-    select typ in "catppuccin-latte" "catppuccin-frappe" "catppuccin-macchiato" "catppuccin-mocha" "tartarus"; do
-        if [ $typ ]; then
-            break
+# @desc Identifies the available package manager and constructs the install command.
+#       Populates g_install_cmd.
+System::detect_pkg_manager() {
+    if [[ "$g_os_type" == "Darwin" ]]; then
+        # Check for Homebrew on macOS
+        if ! command -v brew &>/dev/null; then
+            Logger::info "Homebrew not found. Installing..."
+            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
         fi
+        g_install_cmd="brew install"
+
+    elif [[ "$g_os_type" == "Linux" ]]; then
+        # Check for common Linux package managers
+        if command -v pacman &>/dev/null; then
+            g_install_cmd="sudo pacman -Sy --noconfirm --needed"
+        elif command -v apt-get &>/dev/null; then
+            g_install_cmd="sudo apt-get install -y"
+        elif command -v dnf &>/dev/null; then
+            g_install_cmd="sudo dnf install -y"
+        else
+            Logger::error "Unsupported Linux Package Manager. Please install dependencies manually."
+            exit 1
+        fi
+    else
+        Logger::error "Unsupported Operating System: $g_os_type"
+        exit 1
+    fi
+}
+
+# @desc Abstraction to install a package. Skips if already present.
+# @arg $1 Package Name
+System::install_pkg() {
+    local pkg="$1"
+
+    # macOS specific exception: 'feh' is not standard/needed for walls
+    if [[ "$g_os_type" == "Darwin" && "$pkg" == "feh" ]]; then
+        return
+    fi
+
+    if command -v "$pkg" &>/dev/null; then
+        Logger::info "Package '$pkg' is already installed."
+    else
+        Logger::info "Installing package: $pkg..."
+        # Execute the global install command constructed earlier
+        $g_install_cmd "$pkg"
+    fi
+}
+
+
+# ==============================================================================
+# [MODULE] FILESYSTEM
+# Helper methods for file operations, git cloning, and backups.
+# ==============================================================================
+
+# @desc Creates a temporary directory for download operations.
+# @return Path to temp directory
+FileSystem::make_temp_dir() {
+    local temp_path="${TMPDIR:-/tmp/}$SCRIPT_NAME"
+    mkdir -p "$temp_path"
+    echo "$temp_path"
+}
+
+# @desc Clones a git repository, removing existing directory if conflict occurs.
+# @arg $1 Repo URL
+# @arg $2 Destination Path
+FileSystem::git_clone() {
+    local repo_url="$1"
+    local dest="$2"
+
+    if [[ -d "$dest" ]]; then
+        Logger::warn "Directory '$dest' exists. Removing to ensure fresh clone..."
+        rm -rf "$dest"
+    fi
+    git clone --quiet --depth=1 "$repo_url" "$dest"
+}
+
+# @desc Moves a file/folder to the global backup directory.
+# @arg $1 Path to file/folder
+FileSystem::backup_path() {
+    local file_path="$1"
+    if [[ -e "$file_path" ]]; then
+        mkdir -p "$BACKUP_DIR"
+        mv "$file_path" "$BACKUP_DIR/"
+        Logger::info "Backed up $(basename "$file_path") to $BACKUP_DIR"
+    fi
+}
+
+
+# ==============================================================================
+# [MODULE] INSTALLER
+# Business logic for specific components (Grub, Nvim, Dotfiles, etc.)
+# ==============================================================================
+
+# @desc Installs Arch Linux via the Arch-I script (Linux only).
+Installer::install_arch() {
+    if [[ "$g_os_type" == "Darwin" ]]; then
+        Logger::error "Arch-I installer is not supported on macOS."
+        return
+    fi
+
+    Logger::info "Launching Arch-I installer..."
+    local temp_dir
+    temp_dir=$(FileSystem::make_temp_dir)
+
+    curl -Lo "$temp_dir/arch_i.sh" https://bit.ly/Arch-I
+    chmod +x "$temp_dir/arch_i.sh"
+    "$temp_dir/arch_i.sh"
+}
+
+# @desc Installs LazyNV configuration for Neovim.
+Installer::install_neovim() {
+    local config_install_path="${XDG_CONFIG_HOME:-$HOME/.config}/nvim"
+    local nvdot_repo_url="https://github.com/adityastomar67/NvDots-2.0.git"
+
+    # 1. Dependency Check
+    if ! command -v git >/dev/null 2>&1; then
+        Logger::error "Git is not installed. Cannot install LazyNV."
+        return 1
+    fi
+
+    Logger::info "Setting up Neovim (LazyNV)..."
+
+    # 2. Backup existing configuration
+    if [ -d "$config_install_path" ]; then
+        FileSystem::backup_path "$config_install_path"
+    fi
+
+    # 3. Define stale cache/state directories to purge
+    local neovim_state_paths=(
+        "${XDG_DATA_HOME:-$HOME/.local/share}/nvim"
+        "${XDG_STATE_HOME:-$HOME/.local/state}/nvim"
+        "${XDG_CACHE_HOME:-$HOME/.cache}/nvim"
+    )
+
+    # 4. Clean paths to prevent conflicts
+    for path in "${neovim_state_paths[@]}"; do
+        rm -rf "$path"
     done
 
-	if [[ $typ == "tartarus" ]]; then
-		THEME="GRUB_THEME='/usr/share/grub/themes/$typ/theme.txt'"
-		sudo sed -r -i "s/GRUB_THEME=\"([/.-][a-z]\w+)*\"/$THEME/" /etc/default/grub
-	else
-		THEME="GRUB_THEME='/usr/share/grub/themes/$typ-grub-theme/theme.txt'"
-		sudo sed -r -i "s/GRUB_THEME=\"([/.-][a-z]\w+)*\"/$THEME/" /etc/default/grub
-	fi
-
-	sudo grub-mkconfig -o /boot/grub/grub.cfg
+    # 5. Clone the repository
+    if FileSystem::git_clone "$nvdot_repo_url" "$config_install_path"; then
+        Logger::success "NvDot installed. Launch 'nvim' to finish bootstrapping."
+    else
+        Logger::error "Failed to clone NvDot repository."
+        return 1
+    fi
 }
 
+# @desc Installs Dotfiles using manual symbolic links (ln -s).
+Installer::install_dots() {
+    Logger::info "Configuring Dotfiles..."
 
-_installLazyNV_() {
-	NEOVIM_DIR=$HOME/.config/nvim
-	export NEOVIM_DIR
+    # 1. Determine which repository to use based on OS
+    local target_repo=""
+    if [[ "$g_os_type" == "Darwin" ]]; then
+        target_repo="$DOTS_URL_MAC"
+        Logger::info "Detected macOS. Selected repo: $target_repo"
+    else
+        target_repo="$DOTS_URL_LINUX"
+        Logger::info "Detected Linux. Selected repo: $target_repo"
+    fi
 
-	## Back up current config
-	echo "Backin up current config..." && sleep 2
-	[ -d "$NEOVIM_DIR.backup" ] && rm -rf "$NEOVIM_DIR.backup"
-	[ -d $NEOVIM_DIR ] && mv $NEOVIM_DIR "$NEOVIM_DIR.backup"
+    # 2. Clone the selected repository
+    local dotfiles_dir="$HOME/.dotfiles"
+    FileSystem::git_clone "$target_repo" "$dotfiles_dir"
 
-	## Optional but recommended
-	echo "Removing old cache..." && sleep 2
-	[ -d "$HOME/.local/share/nvim" ] && rm -rf "$HOME/.local/share/nvim"
-	[ -d "$HOME/.local/state/nvim" ] && rm -rf "$HOME/.local/state/nvim"
-	[ -d "$HOME/.cache/nvim" ]       && rm -rf "$HOME/.cache/nvim"
+    # 3. Manual Linking Loop (Replaces Stow)
+    cd "$dotfiles_dir" || exit
 
-	# Create config directory
-	mkdir -p $NEOVIM_DIR
-	git clone https://github.com/adityastomar67/LazyNV.git $NEOVIM_DIR
+    Logger::info "Creating symbolic links..."
 
-	## Run Neovim for the initial setup
-	cd $HOME && nvim
-}
+    # Enable dotglob to catch hidden files (like .zshrc, .config)
+    shopt -s dotglob
 
-_installST_() {
-	echo "${blue}${bold}Installing Suckless Terminal...${reset}"
+    for src in "$dotfiles_dir"/*; do
+        local name
+        name=$(basename "$src")
 
-	_clone_ "$GITHUB_URL/.dotfiles.git" "$tmpDir/dots"
-    cp -r "$tmpDir/dots/.config/st" "$HOME/.config/st"
+        # --- Filter Exclusions ---
+        [[ "$name" == ".git" ]] && continue
+        [[ "$name" == ".gitignore" ]] && continue
+        [[ "$name" == ".DS_Store" ]] && continue
+        [[ "$name" == "README.md" ]] && continue
+        [[ "$name" == "LICENSE" ]] && continue
+        [[ "$name" == "." || "$name" == ".." ]] && continue
 
-    cd "$HOME/.config/st" || return
+        local target="$HOME/$name"
 
-	sudo make clean install
-	xrdb merge ./xresources
+        # --- Handle Existing Files ---
+        if [[ -e "$target" || -L "$target" ]]; then
+            # Check if it's already a link pointing to the correct source (Idempotency)
+            if [[ -L "$target" && "$(readlink "$target")" == "$src" ]]; then
+                Logger::info "Skipping $name (Already linked)"
+                continue
+            fi
 
-	if [ -f "$HOME/.temp_src" ]; then
-		echo 'alias rel="xrdb merge pathToXresourcesFile && kill -USR1 $(pidof st)"' >> $HOME/.temp_src
-	fi
-}
-
-_installDots_() {
-	## Checking if Stow is Installed
-	_pkgInstall_ "stow"
-	_clone_ "$GITHUB_URL/.dotfiles.git" $HOME
-
-	## Making Backups
-	list="$HOME/.dotfiles/bin/file.txt"
-	while IFS= read -r item; do
-		mv "$item" "$item.backup"
-	done <"$list"
-
-	## Stowing dots
-	cd "$HOME/.dotfiles" || exit
-	stow .
-}
-
-_setWallpaper_() {
-	URL="$GITHUB_URL/Wallpapers.git"
-	CUR_DIR=$(pwd)
-	_pkgInstall_ "feh"
-	echo "Checkout Wallpapers @ ${underline}\"$URL\"${reset}"
-
-	# Check if the directory exists already and delete it
-	[ -d "$HOME/.config/wall" ] && rm -rf ~/.config/wall
-
-	_clone_ $URL "$HOME/.config/wall/"
-	COUNT=$(/usr/bin/ls $HOME/.config/wall | wc -l)
-
-	# Move all the static wallpapers to `wall` directory and select the files with .png extension
-	cd "$HOME/.config/wall" || exit
-	mv $HOME/.config/wall/Static/* $HOME/.config/wall/.
-	/usr/bin/ls | grep "wall[0-9]*.png" > list.txt
-
-	# Move all the .png files to .jpg
-	list="./list.txt"
-	while IFS= read -r file ; do
-	mv -- "$file" "${file%.png}.jpg"
-	done < "$list"
-
-	echo "Set random wallpaper or choose one?: "
-    select wall in "choose" "random"; do
-        if [ $wall ]; then
-            break
+            Logger::warn "Target $target already exists. Backing up..."
+            FileSystem::backup_path "$target"
         fi
+
+        # --- Create Link ---
+        # -s: Symbolic, -f: Force (remove existing destination if backup failed or logic allowed)
+        ln -sf "$src" "$target"
+        Logger::success "Linked: $name -> $target"
     done
 
-	if [ $wall == "random" ]; then
-		count=$(command ls ~/.config/wall | grep -c "wall[0-9]*.jpg")
-		feh --no-fehbg --bg-fill "$HOME/.config/wall/wall$((1 + RANDOM % $count)).jpg"
-		echo "Random Wallpaper Applied!!"
-	else
-		read -p "Enter the number of wallpaper you wants to apply between 01 to $COUNT" WALL
-		[ -f "$HOME/wall$WALL.jpg" ] && feh --no-fehbg --bg-fill "$HOME/wall$WALL.jpg"]
-	fi
+    # Disable dotglob to reset shell behavior
+    shopt -u dotglob
 
-	# Remove unnecessary files and set wallpaper
-	command rm -rf .git/ README.md Static list.txt
-
-	cd $CUR_DIR
+    Logger::success "Dotfiles installation complete."
 }
 
-_installDeps_() {
-	## Installing Basic Dependencies
-	__basic_dep() {
-		list="./requirements/list.pacman"
-		while IFS= read -r app; do
-			__pkg_install $app
-		done <"$list"
-	}
+# @desc Downloads wallpapers and sets one (Random or Chosen).
+Installer::setup_wallpapers() {
+    Logger::info "Configuring Wallpapers..."
+    local wall_dir="$HOME/.config/wall"
 
-	## Installing Node Dependencies
-	__node_dep() {
-		list="./requirements/list.node"
-		while IFS= read -r app; do
-			npm i $app
-		done <"$list"
-	}
+    # 1. Install tool (Linux only)
+    if [[ "$g_os_type" == "Linux" ]]; then
+        System::install_pkg "feh"
+    fi
 
-	## Installing Pip Dependencies
-	__pip_dep() {
-		list="./requirements/list.pip"
-		while IFS= read -r app; do
-			python3 -m pip install --user $app
-		done <"$list"
-	}
+    # 2. Download
+    FileSystem::git_clone "$GITHUB_URL/Wallpapers.git" "$wall_dir"
 
-	## Installing Git Dependencies
-	__git_dep() {
-		list="./requirements/list.git"
-		while IFS= read -r app; do
-			${app}
-		done <"$list"
-	}
+    # 3. Flatten directory structure (Remove 'Static' folder if exists)
+    if [[ -d "$wall_dir/Static" ]]; then
+        mv "$wall_dir/Static/"* "$wall_dir/"
+        rm -rf "$wall_dir/Static" "$wall_dir/.git" "$wall_dir/README.md"
+    fi
 
-	## Calling Functions
-	if [ $# -gt 0 ]; then
-		case "$1" in
-		-b)
-			__basic_dep
-			;;
-		-n)
-			__node_dep
-			;;
-		-g)
-			__git_dep
-			;;
-		-p)
-			__pip_dep
-			;;
-		-a)
-			__basic_dep
-			__git_dep
-			__node_dep
-			__pip_dep
-			;;
-		esac
-	fi
+    # 4. Normalize extensions (png -> jpg)
+    # 'nullglob' ensures loop doesn't run if no pngs match
+    shopt -s nullglob
+    for img in "$wall_dir"/*.png; do
+        mv "$img" "${img%.png}.jpg"
+    done
+    shopt -u nullglob
+
+    # 5. User Selection
+    echo "Select Wallpaper Mode:"
+    local selected_file=""
+
+    select mode in "Random" "Choose"; do
+        case $mode in
+            Random)
+                local files=("$wall_dir"/*.jpg)
+                # Select random index based on array length
+                selected_file="${files[RANDOM % ${#files[@]}]}"
+                Logger::success "Selected Random: $(basename "$selected_file")"
+                break
+                ;;
+            Choose)
+                # List files nicely for selection
+                ls "$wall_dir"/*.jpg | xargs -n 1 basename
+                read -r -p "Enter filename (e.g., wall1.jpg): " selection
+                if [[ -f "$wall_dir/$selection" ]]; then
+                    selected_file="$wall_dir/$selection"
+                else
+                    Logger::error "File '$selection' not found."
+                fi
+                break
+                ;;
+        esac
+    done
+
+    # 6. Apply Wallpaper
+    if [[ -n "$selected_file" ]]; then
+        if [[ "$g_os_type" == "Darwin" ]]; then
+            # macOS: Use AppleScript to set desktop background
+            osascript -e "tell application \"System Events\" to tell every desktop to set picture to \"$selected_file\""
+            Logger::success "Wallpaper set via AppleScript."
+        else
+            # Linux: Use feh
+            feh --no-fehbg --bg-fill "$selected_file"
+            Logger::success "Wallpaper set via feh."
+        fi
+    fi
 }
 
-##--> Arch Install Script <--##
-_installArch_() {
-	echo "Taking you to the${yellow}${bold}ARCH-I${reset}..."
-	cd $HOME || exit
-	curl -Lo arch_i.sh https://bit.ly/Arch-I
-	chmod +x arch_i.sh
-	./arch_i.sh
+# @desc Installs GRUB Themes (Linux Only).
+Installer::install_grub() {
+    if [[ "$g_os_type" == "Darwin" ]]; then
+        Logger::warn "GRUB is not supported on macOS."
+        return
+    fi
+
+    # Verify we are on a system using GRUB
+    if [[ ! -d "/boot/grub" ]]; then
+        Logger::error "/boot/grub directory not found. Skipping GRUB setup."
+        return
+    fi
+
+    Logger::info "Downloading GRUB Themes..."
+    local tmp_grub="/tmp/GRUB_THEMES"
+    mkdir -p "$tmp_grub"
+
+    # Clone themes
+    FileSystem::git_clone "https://github.com/AllJavi/tartarus-grub.git" "$tmp_grub/tartarus"
+    sudo cp -r "$tmp_grub/tartarus/tartarus" /usr/share/grub/themes/
+
+    FileSystem::git_clone "https://github.com/catppuccin/grub.git" "$tmp_grub/catppuccin"
+    sudo cp -r "$tmp_grub/catppuccin/src/"* /usr/share/grub/themes/
+
+    # User Selection
+    echo "Select GRUB Theme:"
+    local theme_name=""
+    select theme in "catppuccin-latte" "catppuccin-frappe" "catppuccin-macchiato" "catppuccin-mocha" "tartarus"; do
+        [ -n "$theme" ] && theme_name="$theme" && break
+    done
+
+    # Determine internal path structure based on theme choice
+    local theme_conf_path
+    if [[ "$theme_name" == "tartarus" ]]; then
+        theme_conf_path="/usr/share/grub/themes/$theme_name/theme.txt"
+    else
+        theme_conf_path="/usr/share/grub/themes/$theme_name-grub-theme/theme.txt"
+    fi
+
+    Logger::info "Applying theme configuration..."
+    # Update /etc/default/grub using sed
+    sudo sed -i "s|^GRUB_THEME=.*|GRUB_THEME='$theme_conf_path'|" /etc/default/grub
+
+    # Regenerate config
+    sudo grub-mkconfig -o /boot/grub/grub.cfg
+    Logger::success "GRUB configuration updated."
 }
 
-##--> Starting the execution <--##
-_mainScript_ $1
+# @desc Installs common system dependencies (Git, Curl, Node, Python tools).
+Installer::install_dependencies() {
+    Logger::info "Installing System Dependencies..."
+
+    # 1. System Packages
+    local basic_deps=("git" "curl" "wget" "neovim" "zsh" "tmux" "ripgrep" "fd" "fzf")
+    for pkg in "${basic_deps[@]}"; do
+        System::install_pkg "$pkg"
+    done
+
+    # 2. Node.js Packages (if npm exists)
+    if command -v npm &>/dev/null; then
+        Logger::info "Installing Node.js global packages..."
+        local node_pkgs=("neovim" "tree-sitter-cli")
+        for pkg in "${node_pkgs[@]}"; do
+            # Use sudo for global install unless configured otherwise
+            sudo npm i -g "$pkg"
+        done
+    else
+        Logger::warn "NPM not found. Skipping Node dependencies."
+    fi
+
+    # 3. Python Packages (if python3 exists)
+    if command -v python3 &>/dev/null; then
+        Logger::info "Installing Python packages..."
+        local py_pkgs=("pynvim")
+
+        for pkg in "${py_pkgs[@]}"; do
+            # Attempt install with --break-system-packages (for newer pip/Arch), fallback to standard
+            if ! python3 -m pip install --user "$pkg" --break-system-packages 2>/dev/null; then
+                python3 -m pip install --user "$pkg"
+            fi
+        done
+    fi
+}
+
+# @desc Displays help menu
+Installer::usage() {
+    cat <<EOF
+  ${BOLD}Usage:${RESET} ./$(basename "$0") [OPTIONS]
+
+  ${BOLD}Options:${RESET}
+    -a, --arch      Install Arch Linux (Linux Only).
+    -d, --dots      Install dotfiles (stow).
+    -g, --grub      Install GRUB Themes (Linux Only).
+    -n, --nvim      Install LazyNV (Neovim Config).
+    -r, --deps      Install standard dependencies.
+    -w, --wall      Install and set Wallpapers.
+    -z, --zsh       Install ZSH configuration.
+    -h, --help      Show this help message.
+
+  ${BOLD}Example:${RESET}
+    ./fresh-install.sh --dots --nvim --wall
+EOF
+}
+
+
+# ==============================================================================
+# [MODULE] MAIN
+# Entry point for the script execution.
+# ==============================================================================
+Main() {
+    # Initialize Logger and System detection
+    Logger::init
+    Logger::header
+    System::detect_os
+    System::detect_pkg_manager
+
+    # Ensure at least one argument is provided
+    if [[ $# -eq 0 ]]; then
+        Logger::warn "No arguments provided."
+        Installer::usage
+        exit 1
+    fi
+
+    # Parse Arguments
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -a|--arch)          Installer::install_arch ;;
+            -d|--dots)          Installer::install_dots ;;
+            -g|--grub)          Installer::install_grub ;;
+            -n|--nvim|--LazyNV) Installer::install_neovim ;;
+            -r|--deps)          Installer::install_dependencies ;;
+            -w|--wall)          Installer::setup_wallpapers ;;
+            -z|--zsh)
+                Logger::info "Downloading and installing ZSH Config..."
+                # Piping curl to bash for remote execution
+                bash <(curl -s https://raw.githubusercontent.com/adityastomar67/zsh-conf/master/install.zsh)
+                ;;
+            -h|--help)          Installer::usage; exit 0 ;;
+            *)
+                Logger::error "Unknown option: $1"
+                Installer::usage
+                exit 1
+                ;;
+        esac
+        shift
+    done
+
+    # Cleanup temporary files
+    local temp_path="${TMPDIR:-/tmp/}$SCRIPT_NAME"
+    if [[ -d "$temp_path" ]]; then
+        rm -rf "$temp_path"
+    fi
+
+    Logger::success "Operation Complete. Enjoy your new setup!"
+}
+
+# Execute Main Function with all script arguments
+Main "$@"
