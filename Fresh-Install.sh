@@ -13,6 +13,23 @@
 # -o pipefail: Pipeline returns status of the last command to exit with error.
 set -euo pipefail
 
+# 1. Detect if we are running on an old Bash version (macOS default is 3)
+if [ -n "$BASH_VERSION" ] && [ "${BASH_VERSINFO[0]}" -lt 4 ]; then
+
+    # 2. Check if Zsh is available on the system
+    if command -v zsh >/dev/null 2>&1; then
+        echo " [INFO] Old Bash detected. Restarting with Zsh..."
+        # Re-run this script using zsh, passing all original arguments
+        exec zsh "$0" "$@"
+    else
+        # 3. If no Zsh and old Bash, we must fail gracefully
+        echo " [ERROR] This script requires Bash 4.0+ or Zsh."
+        echo "         macOS ships with Bash 3.2."
+        echo "         Please install Zsh or a newer Bash version (brew install bash)."
+        exit 1
+    fi
+fi
+
 # ==============================================================================
 # [MODULE] CONFIGURATION & CONSTANTS
 # Read-only configuration variables used throughout the script.

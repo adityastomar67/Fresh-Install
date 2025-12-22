@@ -1,63 +1,137 @@
 #!/bin/bash
 
-export NVIM_DIR="$HOME/.config/nvim"
+# --- Colors for Output ---
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RESET='\033[0m'
 
-# Checking if Neovim is Installed
-if [ ! -x "$(command -v nvim)" ]; then
-  echo "${red}Neovim not Installed${reset}"
-  echo "${yellow}Installing Neovim binary..."
+# --- Configuration & Defaults ---
+# Default base URL (Update this to your actual GitHub username/org if needed)
+GITHUB_BASE_URL="https://github.com/adityastomar67"
 
-  echo "Which version of Neovim would you like to install?"
-  echo
-  read -p "Enter 's' for stable or 'n' for nightly:" VERSION
+# XDG Standard Paths
+NVIM_CONFIG_PATH="${XDG_CONFIG_HOME:-$HOME/.config}/nvim"
+NVIM_CACHE_DIRS=(
+  "${XDG_DATA_HOME:-$HOME/.local/share}/nvim"
+  "${XDG_STATE_HOME:-$HOME/.local/state}/nvim"
+  "${XDG_CACHE_HOME:-$HOME/.cache}/nvim"
+)
 
-  [ -d "$HOME/neovim" ] && rm -rf "$HOME/neovim"
-  mkdir "$HOME/neovim"
-  cd "$HOME/neovim" || exit
+# --- Helper Functions ---
 
-  if [[ "$VERSION" == "s" ]]; then
-    printf "\nInstalling Stable version...\n"
-  elif [[ "$VERSION" == "n" ]]; then
-    printf "\nInstalling Nightly version...\n"
-  fi
+Logger::info() { echo -e "${YELLOW}[INFO] $1${RESET}"; }
+Logger::success() { echo -e "${GREEN}[SUCCESS] $1${RESET}"; }
+Logger::error() { echo -e "${RED}[ERROR] $1${RESET}"; }
 
-  if [[ "$VERSION" == "s" ]]; then
-    curl -sLO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
-    sudo chmod u+x nvim.appimage
-    ./nvim.appimage --appimage-extract
-    ./squashfs-root/AppRun --version
-    sudo mv squashfs-root /
-    sudo mv /squashfs-root/AppRun /usr/bin/nvim
-  elif [[ "$VERSION" == "n" ]]; then
-    git clone --quiet --depth 1 --branch nightly https://github.com/neovim/neovim.git
-    cd neovim || exit
-    make CMAKE_BUILD_TYPE=RelWithDebInfo
-    sudo make install
-  fi
+Installer::install_binary() {
+    local version_type="$1" # 'stable' or 'nightly'
+    local download_url=""
+
+    if [[ "$version_type" == "stable" ]]; then
+        download_url="https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz"
+    else
+        download_url="https://github.com/neovim/neovim/releases/download/nightly/nvim-linux64.tar.gz"
+    fi
+
+    Logger::info "Downloading Neovim ($version_type)..."
+
+    # Create a temporary directory for safe downloading
+    local temp_dir
+    temp_dir=$(mktemp -d)
+
+    if ! curl -L "$download_url" -o "$temp_dir/nvim-linux64.tar.gz"; then
+        Logger::error "Download failed."
+        rm -rf "$temp_dir"
+        return 1
+    fi
+
+    Logger::info "Installing to /opt/nvim-linux64 (requires sudo)..."
+
+    # Clean previous installs in /opt
+    if [ -d "/opt/nvim-linux64" ]; then
+        sudo rm -rf "/opt/nvim-linux64"
+    fi
+
+    # Extract new version to /opt
+    sudo tar -C /opt -xzf "$temp_dir/nvim-linux64.tar.gz"
+
+    # Symlink to /usr/local/bin so it's in PATH
+    # Remove old symlink if it exists
+    if [ -L "/usr/local/bin/nvim" ]; then
+        sudo rm "/usr/local/bin/nvim"
+    fi
+    sudo ln -s /opt/nvim-linux64/bin/nvim /usr/local/bin/nvim
+
+    # Cleanup temp files
+    rm -rf "$temp_dir"
+
+    Logger::success "Neovim ($version_type) installed successfully."
+}
+
+Installer::setup_config() {
+    local repo_choice="$1"
+    local repo_url=""
+
+    if [[ "$repo_choice" == "l" ]]; then
+        repo_url="$GITHUB_BASE_URL/LazyNV.git"
+    elif [[ "$repo_choice" == "n" ]]; then
+        repo_url="$GITHUB_BASE_URL/NvStar.git"
+    else
+        Logger::error "Invalid configuration choice."
+        return 1
+    fi
+
+    Logger::info "Backing up existing configuration..."
+    if [ -d "$NVIM_CONFIG_PATH" ]; then
+        mv "$NVIM_CONFIG_PATH" "${NVIM_CONFIG_PATH}.backup.$(date +%s)"
+    fi
+
+    Logger::info "Cleaning old cache and state files..."
+    for dir in "${NVIM_CACHE_DIRS[@]}"; do
+        rm -rf "$dir"
+    done
+
+    Logger::info "Cloning configuration..."
+    if git clone "$repo_url" "$NVIM_CONFIG_PATH"; then
+        Logger::success "Configuration installed!"
+    else
+        Logger::error "Failed to clone repository."
+        return 1
+    fi
+}
+
+# --- Main Execution ---
+
+# 1. Check/Install Neovim
+if ! command -v nvim >/dev/null 2>&1; then
+    echo -e "${RED}Neovim is not installed.${RESET}"
+
+    while true; do
+        read -p "Install Neovim? (s)table / (n)ightly / (q)uit: " neovim_version_choice
+        case "$neovim_version_choice" in
+            s|S) Installer::install_binary "stable"; break ;;
+            n|N) Installer::install_binary "nightly"; break ;;
+            q|Q) echo "Exiting."; exit 0 ;;
+            *) echo "Invalid option. Please enter 's' or 'n'." ;;
+        esac
+    done
+else
+    echo -e "${GREEN}Neovim is already installed.$(command -v nvim)${RESET}"
 fi
-echo "${green}Neovim is installed. Installing configs...${reset}"
 
-## Back up current config
-echo "Backin up current config..." && sleep 2
-[ -d "$NVIM_DIR.backup" ] && rm -rf "$NVIM_DIR.backup"
-[ -d $NVIM_DIR ] && mv $NVIM_DIR "$NVIM_DIR.backup"
-
-## Optional but recommended
-echo "Removing old cache..." && sleep 2
-[ -d "$HOME/.local/share/nvim" ] && rm -rf "$HOME/.local/share/nvim"
-[ -d "$HOME/.local/state/nvim" ] && rm -rf "$HOME/.local/state/nvim"
-[ -d "$HOME/.cache/nvim" ] && rm -rf "$HOME/.cache/nvim"
-
-echo "Which config of Neovim would you like to install?"
+# 2. Install Configuration
 echo
-read -p "Enter 'l' for LazyNV or 'n' for NvStar: " CONF
+echo "Which Neovim configuration would you like to install?"
+while true; do
+    read -p "Enter 'l' for LazyNV, 'n' for NvStar, or 'q' to skip: " config_repo_choice
+    case "$config_repo_choice" in
+        l|L) Installer::setup_config "l"; break ;;
+        n|N) Installer::setup_config "n"; break ;;
+        q|Q) echo "Skipping configuration setup."; break ;;
+        *) echo "Invalid option. Please enter 'l' or 'n'." ;;
+    esac
+done
 
-if [[ "$CONF" == "l" ]]; then
-  git clone "$GITHUB_URL/LazyNV.git" $NVIM_DIR
-elif [[ "$CONF" == "n" ]]; then
-  git clone "$GITHUB_URL/NvStar.git" $NVIM_DIR
-fi
-
-# Remove git related files
-# rm -rf "$NVIM_DIR/.git"
-rm -rf "$HOME/neovim"
+echo
+Logger::success "Setup complete."
